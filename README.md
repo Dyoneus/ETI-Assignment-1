@@ -11,7 +11,15 @@ For each microservice, define the necessary data structures. For example:
 - User Service: User, Profile, CarOwnerProfile entities.
 - Trip Service: Trip, SeatReservation entities.
 
+3. Implement Microservices in Go
+- Setting up a Go environment and create separate Go modules for each microservice. Each microservice should generally have:
+    - HTTP Server: To handle REST API calls.
 
+Tools and Libraries to Consider:
+- Gorilla/Mux: For routing HTTP requests.
+- GORM: ORM library for Go to interact with your database.
+- Cobra: To create powerful CLI applications.
+- JWT: For authentication tokens.
 
 To Do:
 BASIC REQUIREMENTS
