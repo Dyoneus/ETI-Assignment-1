@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 [1.0.1] - 21/11/2023
 Added
     trip-service MAJOR Init main.go
+    user-model PATCH Add models to define structure of the data
 
 Changed
 
