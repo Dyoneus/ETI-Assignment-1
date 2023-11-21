@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"user-service/models"
 
+	"errors"
+
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -49,5 +52,26 @@ func GetUsers(db *gorm.DB) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(users)
+	}
+}
+
+func GetUserByID(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id := vars["id"]
+
+		var user models.User
+		result := db.First(&user, id)
+
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		} else if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(user)
 	}
 }

@@ -12,7 +12,7 @@ Added
     - Import database in main to call 'InitializeDatabase' func
     - Able to now POST to database and create new user
     - Able to now GET user from database to list all users
-
+    - Able to now GET user by ID from database to list all users
     
 Changed
 

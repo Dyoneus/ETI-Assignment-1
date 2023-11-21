@@ -34,6 +34,7 @@ func main() {
 	// Handlers
 	r.HandleFunc("/users", handlers.CreateUser(db)).Methods("POST")
 	r.HandleFunc("/users", handlers.GetUsers(db)).Methods("GET")
+	r.HandleFunc("/users/{id}", handlers.GetUserByID(db)).Methods("GET")
 
 	// Start the server.
 	log.Println("Starting user service on port 5000...")
