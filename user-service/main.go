@@ -31,7 +31,9 @@ func main() {
 	// Set up the router.
 	r := mux.NewRouter()
 
+	// Handlers
 	r.HandleFunc("/users", handlers.CreateUser(db)).Methods("POST")
+	r.HandleFunc("/users", handlers.GetUsers(db)).Methods("GET")
 
 	// Start the server.
 	log.Println("Starting user service on port 5000...")

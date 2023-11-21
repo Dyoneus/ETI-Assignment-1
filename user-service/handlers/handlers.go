@@ -35,3 +35,19 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 		}
 	}
 }
+
+// getUsers returns a handler function that retrieves all users from the database.
+func GetUsers(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var users []models.User
+		result := db.Find(&users)
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(users)
+	}
+}

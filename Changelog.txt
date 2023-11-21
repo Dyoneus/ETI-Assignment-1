@@ -10,6 +10,9 @@ Added
     user-handlers PATCH Add handlers to respond HTTP requesst, interacting with the database
 
     - Import database in main to call 'InitializeDatabase' func
+    - Able to now POST to database and create new user
+    - Able to now GET user from database to list all users
+
     
 Changed
 
