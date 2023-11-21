@@ -1,4 +1,3 @@
-// By Ong Jia Yuan S10227735B
 module trip-service
 
 go 1.21.3
