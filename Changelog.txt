@@ -8,6 +8,8 @@ Added
     trip-models PATCH Add Trip and Reservation structure models
     user-models PATCH Add Passenger and CarOwner structure models
     user-handlers PATCH Add handlers to respond HTTP requesst, interacting with the database
+
+    - Import database in main to call 'InitializeDatabase' func
     
 Changed
 

@@ -1,20 +1,20 @@
 // By Ong Jia Yuan S10227735B
 // main.go in user-service directory
+// user-service/main.go
 package main
 
 import (
 	"log"
 	"net/http"
 
+	"user-service/database" // This imports the database package where InitializeDatabase is defined
+
 	"github.com/gorilla/mux"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
 func main() {
-	// Initialize the database connection.
-	dsn := "username:password@tcp(127.0.0.1:5000)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// Use the InitializeDatabase function from the database package to set up the database connection.
+	db, err := database.InitializeDatabase()
 	if err != nil {
 		log.Fatalf("Could not connect to the database: %v", err)
 	}
@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not get database: %v", err)
 	}
+
 	defer sqlDB.Close()
 
 	// Set up the router.
