@@ -1,5 +1,5 @@
 // By Ong Jia Yuan S10227735B
-module user-service
+module trip-service
 
 go 1.21.3
 
