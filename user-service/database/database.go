@@ -10,7 +10,7 @@ import (
 
 // InitializeDatabase sets up the database connection and runs migrations.
 func InitializeDatabase() (*gorm.DB, error) {
-	dsn := "username:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "username:password@tcp(127.0.0.1:3306)/carpool?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err

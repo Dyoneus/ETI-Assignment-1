@@ -8,21 +8,18 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB // Add this line to declare the db variable
+func CreateUser(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var user models.User
+		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
-// CreateUser creates a new user in the database.
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	// You will need to decode the request body into the User struct.
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		// Use the passed-in db to create the user
+		db.Create(&user)
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(user)
 	}
-
-	// insert the new User into the database.
-	db.Create(&user)
-
-	// Finally, encode the created user into JSON and send it in the response.
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
 }

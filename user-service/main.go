@@ -1,13 +1,14 @@
 // By Ong Jia Yuan S10227735B
 // main.go in user-service directory
 // user-service/main.go
+
 package main
 
 import (
 	"log"
 	"net/http"
-
 	"user-service/database" // This imports the database package where InitializeDatabase is defined
+	"user-service/handlers"
 
 	"github.com/gorilla/mux"
 )
@@ -29,6 +30,8 @@ func main() {
 
 	// Set up the router.
 	r := mux.NewRouter()
+
+	r.HandleFunc("/users", handlers.CreateUser(db)).Methods("POST")
 
 	// Start the server.
 	log.Println("Starting user service on port 5000...")
