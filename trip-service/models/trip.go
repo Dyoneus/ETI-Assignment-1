@@ -17,3 +17,10 @@ type Trip struct {
 	AvailableSeats     int       `json:"available_seats"`
 	EnrolledPassengers int       `json:"enrolled_passengers"`
 }
+
+// Reservation represents a seat reservation for a trip by a passenger.
+type Reservation struct {
+	gorm.Model
+	TripID      uint `json:"trip_id"`
+	PassengerID uint `json:"passenger_id"`
+}
