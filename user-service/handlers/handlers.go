@@ -16,10 +16,22 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		// Use the passed-in db to create the user
-		db.Create(&user)
+		// Attempt to insert the new User into the database.
+		result := db.Create(&user)
 
+		// Check for errors during the create operation.
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(user)
+
+		// Encode and send the created user as the response.
+		err := json.NewEncoder(w).Encode(user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
