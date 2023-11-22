@@ -11,8 +11,15 @@ import (
 	"strings"
 )
 
+// Simulate the idea of a session retaining the user's information
+type AppSession struct {
+	Email    string
+	UserType string
+}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
+	var session AppSession // A variable to hold the session information
 
 	for {
 		fmt.Println("===========================================================")
@@ -31,7 +38,10 @@ func main() {
 		case "1":
 			signUp(reader)
 		case "2":
-			logIn(reader)
+			session = logIn(reader) // Capture the session information after logging in
+			if session.Email != "" {
+				showMainMenu(reader, &session)
+			}
 		case "3":
 			fmt.Println("Exiting the application. Goodbye!")
 			return
@@ -98,7 +108,7 @@ func signUp(reader *bufio.Reader) {
 	reader.ReadString('\n')
 }
 
-func logIn(reader *bufio.Reader) {
+func logIn(reader *bufio.Reader) (session AppSession) {
 	fmt.Println("\n============")
 	fmt.Println("Log In")
 	fmt.Println("============\n")
@@ -133,7 +143,6 @@ func logIn(reader *bufio.Reader) {
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("\nLogin successful!")
 		fmt.Println("\nPress 'Enter' to proceed to the main menu...")
-
 		// Read the response body
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -144,7 +153,6 @@ func logIn(reader *bufio.Reader) {
 		var loginResponse struct {
 			UserType string `json:"userType"`
 		}
-
 		// Unmarshal the JSON response into the loginResponse struct
 		err = json.Unmarshal(responseBody, &loginResponse)
 		if err != nil {
@@ -152,19 +160,27 @@ func logIn(reader *bufio.Reader) {
 			return
 		}
 
-		showMainMenu(reader, loginResponse.UserType)
+		// Store user's email and type in the session
+		session = AppSession{
+			Email:    email,
+			UserType: loginResponse.UserType,
+		}
+		showMainMenu(reader, &session)
 	} else {
 		fmt.Println("\nLogin failed. Please check your credentials and try again.")
 		fmt.Println("\nPress 'Enter' to return to the login screen...")
 	}
+
 	// Prompt to press 'Enter' and read it to pause the program
 	fmt.Println("\nPress 'Enter' to continue...")
 	reader.ReadString('\n')
+
+	return session
 }
 
-func showMainMenu(reader *bufio.Reader, userType string) {
+func showMainMenu(reader *bufio.Reader, session *AppSession) {
 	for {
-		if userType == "car_owner" {
+		if session.UserType == "car_owner" {
 			fmt.Println("\nCar Owner Menu:")
 			fmt.Println("1. Publish a Trip")
 			fmt.Println("2. Manage Trips")
@@ -177,7 +193,8 @@ func showMainMenu(reader *bufio.Reader, userType string) {
 			fmt.Println("2. Enroll in a Trip")
 			fmt.Println("3. View Enrolled Trips")
 			fmt.Println("4. View Past Trips")
-			fmt.Println("5. Log Out")
+			fmt.Println("5. Update Profile")
+			fmt.Println("6. Log Out")
 		}
 
 		fmt.Print("\nEnter your choice: ")
@@ -186,25 +203,48 @@ func showMainMenu(reader *bufio.Reader, userType string) {
 
 		switch choice {
 		case "1":
-			if userType == "car_owner" {
+			if session.UserType == "car_owner" {
 				//publishTrip(reader)
 			} else {
 				//browseTrips(reader)
 			}
 		case "2":
-			if userType == "car_owner" {
+			if session.UserType == "car_owner" {
 				//manageTrips(reader)
 			} else {
 				//enrollInTrip(reader)
 			}
 		case "3":
-			//updateProfile(reader)
+			if session.UserType == "car_owner" {
+				updateCarOwnerProfile(reader)
+			} else {
+				//viewEnrolledTrips(reader)
+			}
 		case "4":
 			//viewPastTrips(reader)
 		case "5":
+			if session.UserType == "car_owner" {
+				return
+			} else {
+				updateUserProfile(reader)
+			}
+		case "6":
+
 			return
 		default:
 			fmt.Println("Invalid choice, please try again.")
 		}
 	}
+}
+
+// SECTION 1: UPDATE PROFILE MENU
+func updateCarOwnerProfile(reader *bufio.Reader) {
+	fmt.Println("\nUpdate Car Owner Profile:")
+	// Prompt the user to update number of passengers car can accomodate
+}
+
+func updateUserProfile(reader *bufio.Reader) {
+	fmt.Println("\nUpdate User Profile:")
+	// Prompt the user name, mobile number, and email changes.
+	// An option to delete the account if it's older than 1 year.
 }
