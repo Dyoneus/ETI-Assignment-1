@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt" // Hashing password
 	"gorm.io/gorm"
 )
 
@@ -18,6 +19,14 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		// Hash the user's password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+			return
+		}
+		user.Password = string(hashedPassword)
 
 		// Attempt to insert the new User into the database.
 		result := db.Create(&user)
@@ -32,7 +41,7 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 
 		// Encode and send the created user as the response.
-		err := json.NewEncoder(w).Encode(user)
+		err = json.NewEncoder(w).Encode(user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

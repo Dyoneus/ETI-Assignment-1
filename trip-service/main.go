@@ -14,7 +14,6 @@ func main() {
 	r := mux.NewRouter()
 
 	// The setup code would be very similar to the user-service's main.go
-	// Make sure to change the port number if both services will run on the same host.
 	log.Println("Starting trip service on port 5001...")
 	if err := http.ListenAndServe(":5001", r); err != nil {
 		log.Fatalf("Could not start server: %v", err)

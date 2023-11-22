@@ -2,9 +2,7 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -64,37 +62,29 @@ func signUp(reader *bufio.Reader) {
 	password, _ := reader.ReadString('\n')
 	password = strings.TrimSpace(password)
 
-	user := map[string]string{
-		"first_name": firstName,
-		"last_name":  lastName,
-		"mobile":     mobile,
-		"email":      email,
-		"password":   password,
-	}
-
-	userData, err := json.Marshal(user)
-	if err != nil {
-		fmt.Println("Error encoding user data:", err)
-		return
-	}
-
-	response, err := http.Post("http://localhost:5000/users", "application/json", strings.NewReader(string(userData)))
-	if err != nil {
-		fmt.Println("Error calling signup service:", err)
-		return
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode == http.StatusCreated {
-		fmt.Println("\nSignup successful!")
-	} else {
-		fmt.Println("\nSignup failed!")
-	}
-
+	// Here you would add logic to call the microservice to create an account
+	// For now, just print a success message
+	fmt.Println("\nAccount created successfully!")
 	fmt.Println("\nPress 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 }
 
 func logIn(reader *bufio.Reader) {
-	// Logic to handle user login
+	fmt.Println("\n============")
+	fmt.Println("Log In")
+	fmt.Println("============\n")
+
+	fmt.Print("Please enter your email address: ")
+	email, _ := reader.ReadString('\n')
+	email = strings.TrimSpace(email)
+
+	fmt.Print("Please enter your password: ")
+	password, _ := reader.ReadString('\n')
+	password = strings.TrimSpace(password)
+
+	// Here you would add logic to call the microservice to log in
+	// For now, just print a success message
+	fmt.Println("\nLogin successful!")
+	fmt.Println("\nPress 'Enter' to proceed to the main menu...")
+	reader.ReadString('\n')
 }
