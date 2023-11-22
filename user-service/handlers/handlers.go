@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"user-service/models"
 
@@ -19,6 +18,9 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		// Set default user type to "passenger"
+		user.UserType = "passenger"
 
 		// Hash the user's password
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -72,10 +74,19 @@ func Login(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		// If successful, respond with OK or a token if you implement JWT
+		// If login is successful, create a response struct with the UserType
+		response := struct {
+			UserType string `json:"userType"`
+		}{
+			UserType: user.UserType,
+		}
+
+		// Set Content-Type header to application/json
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		// Here you could create and return a JWT token
-		fmt.Fprintln(w, "Login successful")
+
+		// Send the response with the UserType
+		json.NewEncoder(w).Encode(response)
 	}
 }
 

@@ -12,6 +12,7 @@ type User struct {
 	Mobile    string `json:"mobile"`
 	Email     string `gorm:"uniqueIndex" json:"email"`
 	Password  string `json:"password"`
+	UserType  string `json:"user_type"`
 }
 
 // CarOwnerProfile represents a car owner's profile, extending the User model.

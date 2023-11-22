@@ -10,7 +10,7 @@ Added
     - User information during creation is successfully added to mySQL database
     - User login now extract information from mySQL database for authentication
     - User login now compares hashed password
-    
+    - Show userType based menu (Passenger or Car Owner)
 Changed
 
 Fixed

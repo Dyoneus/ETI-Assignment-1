@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -122,7 +123,6 @@ func logIn(reader *bufio.Reader) {
 		return
 	}
 
-	// Replace this URL with the actual URL of your user-service endpoint for login
 	resp, err := http.Post("http://localhost:5000/login", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		fmt.Println("Error calling login service:", err)
@@ -133,9 +133,78 @@ func logIn(reader *bufio.Reader) {
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("\nLogin successful!")
 		fmt.Println("\nPress 'Enter' to proceed to the main menu...")
+
+		// Read the response body
+		responseBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error reading response body:", err)
+			return
+		}
+
+		var loginResponse struct {
+			UserType string `json:"userType"`
+		}
+
+		// Unmarshal the JSON response into the loginResponse struct
+		err = json.Unmarshal(responseBody, &loginResponse)
+		if err != nil {
+			fmt.Println("Error unmarshaling response:", err)
+			return
+		}
+
+		showMainMenu(reader, loginResponse.UserType)
 	} else {
 		fmt.Println("\nLogin failed. Please check your credentials and try again.")
 		fmt.Println("\nPress 'Enter' to return to the login screen...")
 	}
+	// Prompt to press 'Enter' and read it to pause the program
+	fmt.Println("\nPress 'Enter' to continue...")
 	reader.ReadString('\n')
+}
+
+func showMainMenu(reader *bufio.Reader, userType string) {
+	for {
+		if userType == "car_owner" {
+			fmt.Println("\nCar Owner Menu:")
+			fmt.Println("1. Publish a Trip")
+			fmt.Println("2. Manage Trips")
+			fmt.Println("3. Update Profile")
+			fmt.Println("4. View Past Trips")
+			fmt.Println("5. Log Out")
+		} else { // Default to passenger menu
+			fmt.Println("\nPassenger Menu:")
+			fmt.Println("1. Browse Trips")
+			fmt.Println("2. Enroll in a Trip")
+			fmt.Println("3. View Enrolled Trips")
+			fmt.Println("4. View Past Trips")
+			fmt.Println("5. Log Out")
+		}
+
+		fmt.Print("\nEnter your choice: ")
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+
+		switch choice {
+		case "1":
+			if userType == "car_owner" {
+				//publishTrip(reader)
+			} else {
+				//browseTrips(reader)
+			}
+		case "2":
+			if userType == "car_owner" {
+				//manageTrips(reader)
+			} else {
+				//enrollInTrip(reader)
+			}
+		case "3":
+			//updateProfile(reader)
+		case "4":
+			//viewPastTrips(reader)
+		case "5":
+			return
+		default:
+			fmt.Println("Invalid choice, please try again.")
+		}
+	}
 }
