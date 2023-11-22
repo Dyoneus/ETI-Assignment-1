@@ -2,7 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -63,8 +66,34 @@ func signUp(reader *bufio.Reader) {
 	password = strings.TrimSpace(password)
 
 	// Here you would add logic to call the microservice to create an account
-	// For now, just print a success message
-	fmt.Println("\nAccount created successfully!")
+	userData := map[string]string{
+		"first_name": firstName,
+		"last_name":  lastName,
+		"mobile":     mobile,
+		"email":      email,
+		"password":   password,
+	}
+
+	jsonData, err := json.Marshal(userData)
+	if err != nil {
+		fmt.Println("Error marshaling user data:", err)
+		return
+	}
+
+	// Replace this URL with the actual URL of your user-service endpoint for creating a new user
+	resp, err := http.Post("http://localhost:5000/users", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error calling signup service:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusCreated {
+		fmt.Println("\nAccount created successfully!")
+	} else {
+		fmt.Println("\nFailed to create account. Status code:", resp.StatusCode)
+	}
+
 	fmt.Println("\nPress 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 }

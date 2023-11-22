@@ -2,6 +2,17 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+[1.0.2] - 22/11/2023
+Added
+    - Console Application for User Menu
+    - Password for User account's creation
+    - Password Hashing for security
+    
+Changed
+
+Fixed
+
+
 [1.0.1] - 21/11/2023
 Added
     trip-service MAJOR Init main.go
