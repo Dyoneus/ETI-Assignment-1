@@ -65,7 +65,7 @@ func signUp(reader *bufio.Reader) {
 	password, _ := reader.ReadString('\n')
 	password = strings.TrimSpace(password)
 
-	// Here you would add logic to call the microservice to create an account
+	// Add logic to call the microservice to create an account
 	userData := map[string]string{
 		"first_name": firstName,
 		"last_name":  lastName,
@@ -80,7 +80,6 @@ func signUp(reader *bufio.Reader) {
 		return
 	}
 
-	// Replace this URL with the actual URL of your user-service endpoint for creating a new user
 	resp, err := http.Post("http://localhost:5000/users", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		fmt.Println("Error calling signup service:", err)
@@ -111,9 +110,32 @@ func logIn(reader *bufio.Reader) {
 	password, _ := reader.ReadString('\n')
 	password = strings.TrimSpace(password)
 
-	// Here you would add logic to call the microservice to log in
-	// For now, just print a success message
-	fmt.Println("\nLogin successful!")
-	fmt.Println("\nPress 'Enter' to proceed to the main menu...")
+	// Add logic to call the microservice to create an account
+	loginData := map[string]string{
+		"email":    email,
+		"password": password,
+	}
+
+	jsonData, err := json.Marshal(loginData)
+	if err != nil {
+		fmt.Println("Error marshaling login data:", err)
+		return
+	}
+
+	// Replace this URL with the actual URL of your user-service endpoint for login
+	resp, err := http.Post("http://localhost:5000/login", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error calling login service:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("\nLogin successful!")
+		fmt.Println("\nPress 'Enter' to proceed to the main menu...")
+	} else {
+		fmt.Println("\nLogin failed. Please check your credentials and try again.")
+		fmt.Println("\nPress 'Enter' to return to the login screen...")
+	}
 	reader.ReadString('\n')
 }

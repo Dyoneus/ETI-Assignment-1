@@ -7,11 +7,14 @@ Added
     - Console Application for User Menu
     - Password for User account's creation
     - Password Hashing for security
+    - User information during creation is successfully added to mySQL database
+    - User login now extract information from mySQL database for authentication
+    - User login now compares hashed password
     
 Changed
 
 Fixed
-
+    - SignUp handler not saving into information into mySQL database
 
 [1.0.1] - 21/11/2023
 Added

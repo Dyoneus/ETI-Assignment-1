@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"user-service/models"
-
-	"errors"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt" // Hashing password
@@ -28,11 +28,8 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 		}
 		user.Password = string(hashedPassword)
 
-		// Attempt to insert the new User into the database.
-		result := db.Create(&user)
-
-		// Check for errors during the create operation.
-		if result.Error != nil {
+		// Create the user in the database
+		if result := db.Create(&user); result.Error != nil {
 			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -45,6 +42,40 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+	}
+}
+
+func Login(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Define a struct to decode the login request
+		var loginRequest struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Find the user by email
+		var user models.User
+		result := db.Where("email = ?", loginRequest.Email).First(&user)
+		if result.Error != nil {
+			http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
+			return
+		}
+
+		// Compare the hashed password
+		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password))
+		if err != nil {
+			http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
+			return
+		}
+
+		// If successful, respond with OK or a token if you implement JWT
+		w.WriteHeader(http.StatusOK)
+		// Here you could create and return a JWT token
+		fmt.Fprintln(w, "Login successful")
 	}
 }
 

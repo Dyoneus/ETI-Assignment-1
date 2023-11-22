@@ -31,6 +31,7 @@ func main() {
 	r := mux.NewRouter()
 
 	// Handlers
+	r.HandleFunc("/login", handlers.Login(db)).Methods("POST")
 	r.HandleFunc("/users", handlers.CreateUser(db)).Methods("POST")
 	r.HandleFunc("/users", handlers.GetUsers(db)).Methods("GET")
 	r.HandleFunc("/users/{id}", handlers.GetUserByID(db)).Methods("GET")
