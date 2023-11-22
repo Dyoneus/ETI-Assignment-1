@@ -22,7 +22,7 @@ func main() {
 	var session AppSession // A variable to hold the session information
 
 	for {
-		fmt.Println("===========================================================")
+		fmt.Println("\n===========================================================")
 		fmt.Println("Welcome to the Car-Pooling Service Console Application!")
 		fmt.Println("===========================================================")
 		fmt.Println("\nPlease select an option:")
@@ -43,10 +43,12 @@ func main() {
 				showMainMenu(reader, &session)
 			}
 		case "3":
-			fmt.Println("Exiting the application. Goodbye!")
+			fmt.Println("\nExiting the application. Goodbye!")
 			return
 		default:
-			fmt.Println("Invalid choice, please try again.")
+			fmt.Println("\nInvalid choice, please try again.")
+			fmt.Println("Press 'Enter' to return to the main menu...")
+			reader.ReadString('\n') // Pause the program
 		}
 	}
 }
@@ -75,6 +77,14 @@ func signUp(reader *bufio.Reader) {
 	fmt.Print("Please enter your password: ")
 	password, _ := reader.ReadString('\n')
 	password = strings.TrimSpace(password)
+
+	// Before marshaling and sending the data, validate the input
+	if firstName == "" || lastName == "" || mobile == "" || email == "" || password == "" {
+		fmt.Println("\nAll fields are required and cannot be empty. Please try again.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n') // Pause the program
+		return
+	}
 
 	// Add logic to call the microservice to create an account
 	userData := map[string]string{
@@ -142,7 +152,6 @@ func logIn(reader *bufio.Reader) (session AppSession) {
 
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("\nLogin successful!")
-		fmt.Println("\nPress 'Enter' to proceed to the main menu...")
 		// Read the response body
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -168,7 +177,6 @@ func logIn(reader *bufio.Reader) (session AppSession) {
 		showMainMenu(reader, &session)
 	} else {
 		fmt.Println("\nLogin failed. Please check your credentials and try again.")
-		fmt.Println("\nPress 'Enter' to return to the login screen...")
 	}
 
 	// Prompt to press 'Enter' and read it to pause the program
@@ -232,7 +240,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 
 			return
 		default:
-			fmt.Println("Invalid choice, please try again.")
+			fmt.Println("\nInvalid choice, please try again.")
 		}
 	}
 }

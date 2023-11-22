@@ -19,6 +19,12 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
+		// Server-side validation
+		if user.FirstName == "" || user.LastName == "" || user.Mobile == "" || user.Email == "" || user.Password == "" {
+			http.Error(w, "All fields are required and cannot be empty.", http.StatusBadRequest)
+			return
+		}
+
 		// Set default user type to "passenger"
 		user.UserType = "passenger"
 
