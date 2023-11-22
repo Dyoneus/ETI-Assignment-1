@@ -1,5 +1,5 @@
 // By Ong Jia Yuan S10227735B
-// main.go in trip-service directory
+// /trip-service/main.go
 package main
 
 import (

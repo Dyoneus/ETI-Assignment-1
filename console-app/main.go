@@ -1,3 +1,4 @@
+// /console-app/main.go
 package main
 
 import (
@@ -13,8 +14,11 @@ import (
 
 // Simulate the idea of a session retaining the user's information
 type AppSession struct {
-	Email    string
-	UserType string
+	Email     string
+	UserType  string
+	FirstName string
+	LastName  string
+	Password  string
 }
 
 func main() {
@@ -224,7 +228,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			}
 		case "3":
 			if session.UserType == "car_owner" {
-				updateCarOwnerProfile(reader)
+				updateCarOwnerProfile(reader, session)
 			} else {
 				//viewEnrolledTrips(reader)
 			}
@@ -232,27 +236,170 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			//viewPastTrips(reader)
 		case "5":
 			if session.UserType == "car_owner" {
+				fmt.Println("\nReturning to the main menu.")
 				return
 			} else {
-				updateUserProfile(reader)
+				fmt.Println("\nGoing to update passenger profile.")
+				updateUserProfile(reader, session)
 			}
 		case "6":
-
 			return
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
+			fmt.Println("Press 'Enter' to continue...")
+			reader.ReadString('\n')
 		}
 	}
 }
 
 // SECTION 1: UPDATE PROFILE MENU
-func updateCarOwnerProfile(reader *bufio.Reader) {
-	fmt.Println("\nUpdate Car Owner Profile:")
-	// Prompt the user to update number of passengers car can accomodate
+func updateCarOwnerProfile(reader *bufio.Reader, session *AppSession) {
+	for {
+		fmt.Println("\nWhat would you like to update?")
+		fmt.Println("1. Name")
+		fmt.Println("2. Mobile Number")
+		fmt.Println("3. Email Address")
+		fmt.Println("4. Number of Passengers")
+		fmt.Println("5. Driver's License Number")
+		fmt.Println("6. Car Plate Number")
+		fmt.Println("7. Delete Account")
+		fmt.Println("8. Return to Main Menu")
+
+		fmt.Print("\nEnter your choice: ")
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+
+		switch choice {
+		case "1":
+			updateUserName(reader, session)
+		case "2":
+			//updateUserMobile(reader, session)
+		case "3":
+			//updateUserEmail(reader, session)
+		case "4":
+			//updatePassengerCapacity(reader, session)
+		case "5":
+			//updateDriversLicense(reader, session)
+		case "6":
+			//updateCarPlate(reader, session)
+		case "7":
+			//deleteAccount(reader, session)
+			return // Return to main menu after deleting the account
+		case "8":
+			return // Return to main menu
+		default:
+			fmt.Println("\nInvalid choice, please try again.")
+			fmt.Println("Press 'Enter' to continue...")
+			reader.ReadString('\n')
+		}
+	}
 }
 
-func updateUserProfile(reader *bufio.Reader) {
-	fmt.Println("\nUpdate User Profile:")
-	// Prompt the user name, mobile number, and email changes.
-	// An option to delete the account if it's older than 1 year.
+func updateUserProfile(reader *bufio.Reader, session *AppSession) {
+	for {
+		fmt.Println("\nWhat would you like to update?")
+		fmt.Println("1. Name")
+		fmt.Println("2. Mobile Number")
+		fmt.Println("3. Email Address")
+		fmt.Println("4. Delete Account")
+		fmt.Println("5. Return to Main Menu")
+
+		fmt.Print("\nEnter your choice: ")
+		choice, _ := reader.ReadString('\n')
+		choice = strings.TrimSpace(choice)
+
+		switch choice {
+		case "1":
+			updateUserName(reader, session)
+		case "2":
+			//updateUserMobile(reader, session)
+		case "3":
+			//updateUserEmail(reader, session)
+		case "4":
+			//deleteAccount(reader, session)
+			return // Return to main menu after deleting the account
+		case "5":
+			return // Return to main menu
+		default:
+			fmt.Println("\nInvalid choice, please try again.")
+			fmt.Println("Press 'Enter' to continue...")
+			reader.ReadString('\n')
+		}
+	}
+}
+
+// Functions for updating the profile
+func updateUserName(reader *bufio.Reader, session *AppSession) {
+	// Prompt the user for new first name
+	fmt.Print("Please enter your new first name: ")
+	newFirstName, _ := reader.ReadString('\n')
+	newFirstName = strings.TrimSpace(newFirstName)
+
+	// Prompt the user for new last name
+	fmt.Print("Please enter your new last name: ")
+	newLastName, _ := reader.ReadString('\n')
+	newLastName = strings.TrimSpace(newLastName)
+
+	// Validate the input
+	if newFirstName == "" || newLastName == "" {
+		fmt.Println("First and last name cannot be empty.")
+		return
+	}
+
+	updateData := map[string]string{
+		"email":      session.Email, // assuming session.Email contains the user's email
+		"first_name": newFirstName,
+		"last_name":  newLastName,
+	}
+
+	jsonData, err := json.Marshal(updateData)
+	if err != nil {
+		fmt.Println("Error marshaling update data:", err)
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5000/users", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Failed to update name. Status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	// Successfully updated the name
+	fmt.Println("Your name has been updated successfully.")
+
+	// Update the session with the new name
+	session.FirstName = newFirstName
+	session.LastName = newLastName
+
+	fmt.Println("\nPress 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
+}
+
+func updateUserMobile(reader *bufio.Reader, session *AppSession) { /* ... */ }
+func updateUserEmail(reader *bufio.Reader, session *AppSession)  { /* ... */ }
+
+func updatePassengerCapacity(reader *bufio.Reader, session *AppSession) {
+	fmt.Print("Please enter the new number of passengers your car can accommodate: ")
+}
+
+func updateDriversLicense(reader *bufio.Reader, session *AppSession) { /* ... */ }
+func updateCarPlate(reader *bufio.Reader, session *AppSession)       { /* ... */ }
+
+func deleteAccount(reader *bufio.Reader, session *AppSession) {
+	// Confirm deletion and send a DELETE request to the user-service
 }

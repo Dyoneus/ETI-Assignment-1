@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file.
 [1.0.3] - 23/11/2023
 Added
     - Added variable session to simulate saved session
+    - Add User Name Update Profile
 Changed
-
+    
 Fixed
-
+    - Fixed HTTP Status code 400, 401, 404, 405 & 500 
+    - Name update now PATCH to database
 
 [1.0.2] - 22/11/2023
 Added

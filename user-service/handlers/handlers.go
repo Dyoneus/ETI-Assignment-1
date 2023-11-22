@@ -1,3 +1,4 @@
+// /user-service/handlers/handlers.go
 package handlers
 
 import (
@@ -129,6 +130,48 @@ func GetUserByID(db *gorm.DB) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(user)
+	}
+}
+
+func UpdateUser(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var updateRequest struct {
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+			Email     string `json:"email"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&updateRequest); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if updateRequest.Email == "" {
+			http.Error(w, "Email address is required", http.StatusBadRequest)
+			return
+		}
+
+		var user models.User
+		result := db.Where("email = ? AND deleted_at IS NULL", updateRequest.Email).First(&user)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		} else if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		user.FirstName = updateRequest.FirstName
+		user.LastName = updateRequest.LastName
+
+		if err := db.Save(&user).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 	}
 }

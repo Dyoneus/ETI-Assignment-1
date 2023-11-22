@@ -1,3 +1,4 @@
+// /trip-service/models/trip.go
 package models
 
 import (

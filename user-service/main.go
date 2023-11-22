@@ -36,6 +36,9 @@ func main() {
 	r.HandleFunc("/users", handlers.GetUsers(db)).Methods("GET")
 	r.HandleFunc("/users/{id}", handlers.GetUserByID(db)).Methods("GET")
 
+	// Handlers for updating profile
+	r.HandleFunc("/users", handlers.UpdateUser(db)).Methods("PATCH")
+
 	// Start the server.
 	log.Println("Starting user service on port 5000...")
 	if err := http.ListenAndServe(":5000", r); err != nil {
