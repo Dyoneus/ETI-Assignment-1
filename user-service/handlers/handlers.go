@@ -4,7 +4,9 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/mail"
 	"user-service/models"
 
 	"github.com/gorilla/mux"
@@ -203,5 +205,41 @@ func UpdateUserMobile(db *gorm.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(map[string]string{
 			"result": "Mobile number updated successfully",
 		})
+	}
+}
+
+// isValidEmail checks if the provided email address has a valid format.
+func isValidEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+func UpdateUserEmail(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var emailUpdateRequest struct {
+			OldEmail string `json:"old_email"`
+			NewEmail string `json:"new_email"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&emailUpdateRequest); err != nil {
+			http.Error(w, "Invalid request", http.StatusBadRequest)
+			return
+		}
+
+		// Validate the new email
+		if !isValidEmail(emailUpdateRequest.NewEmail) {
+			http.Error(w, "Invalid email format", http.StatusBadRequest)
+			return
+		}
+
+		// Update the user's email
+		result := db.Model(&models.User{}).
+			Where("email = ?", emailUpdateRequest.OldEmail).
+			Update("email", emailUpdateRequest.NewEmail)
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Email updated successfully")
 	}
 }

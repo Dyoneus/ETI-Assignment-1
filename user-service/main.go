@@ -39,6 +39,7 @@ func main() {
 	// Handlers for updating profile
 	r.HandleFunc("/users", handlers.UpdateUser(db)).Methods("PATCH")
 	r.HandleFunc("/updateMobile", handlers.UpdateUserMobile(db)).Methods("PATCH")
+	r.HandleFunc("/updateEmail", handlers.UpdateUserEmail(db)).Methods("PATCH")
 
 	// Start the server.
 	log.Println("Starting user service on port 5000...")

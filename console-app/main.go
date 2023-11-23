@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/mail" // Parsing email address
 	"os"
 	"strings"
 	"unicode"
@@ -315,7 +316,7 @@ func updateUserProfile(reader *bufio.Reader, session *AppSession) {
 		case "2":
 			updateUserMobile(reader, session)
 		case "3":
-			//updateUserEmail(reader, session)
+			updateUserEmail(reader, session)
 		case "4":
 			//deleteAccount(reader, session)
 			return // Return to main menu after deleting the account
@@ -453,6 +454,7 @@ func updateUserMobile(reader *bufio.Reader, session *AppSession) {
 	reader.ReadString('\n')
 }
 
+// isValidMobileNumber func is a mobile number validation logic
 func isValidMobileNumber(number string) bool {
 	for _, r := range number {
 		if !unicode.IsDigit(r) {
@@ -463,7 +465,68 @@ func isValidMobileNumber(number string) bool {
 	return true
 }
 
-func updateUserEmail(reader *bufio.Reader, session *AppSession) { /* ... */ }
+func updateUserEmail(reader *bufio.Reader, session *AppSession) {
+	fmt.Println("\nUpdate Email Address:")
+	fmt.Print("\nPlease enter your new email address: ")
+	newEmail, _ := reader.ReadString('\n')
+	newEmail = strings.TrimSpace(newEmail)
+
+	// Validate the new email
+	if !isValidEmail(newEmail) {
+		fmt.Println("\nInvalid email format. Please enter a valid email address.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n')
+		return
+	}
+
+	// Prepare the request payload
+	updateData := map[string]string{
+		"old_email": session.Email,
+		"new_email": newEmail,
+	}
+
+	jsonData, err := json.Marshal(updateData)
+	if err != nil {
+		fmt.Println("Error marshaling update data:", err)
+		return
+	}
+
+	// Create the request
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5000/updateEmail", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Execute the request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the response
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Failed to update email. Status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	// Update the session with the new email
+	session.Email = newEmail
+	fmt.Println("\nEmail address updated successfully.")
+
+	// Prompt to return to main menu
+	fmt.Println("Press 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
+}
+
+// isValidEmail func is a email validation logic.
+func isValidEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
 
 func updatePassengerCapacity(reader *bufio.Reader, session *AppSession) {
 	fmt.Print("Please enter the new number of passengers your car can accommodate: ")
