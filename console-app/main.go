@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"unicode"
 )
 
 // Simulate the idea of a session retaining the user's information
@@ -312,7 +313,7 @@ func updateUserProfile(reader *bufio.Reader, session *AppSession) {
 		case "1":
 			updateUserName(reader, session)
 		case "2":
-			//updateUserMobile(reader, session)
+			updateUserMobile(reader, session)
 		case "3":
 			//updateUserEmail(reader, session)
 		case "4":
@@ -342,7 +343,9 @@ func updateUserName(reader *bufio.Reader, session *AppSession) {
 
 	// Validate the input
 	if newFirstName == "" || newLastName == "" {
-		fmt.Println("First and last name cannot be empty.")
+		fmt.Println("\nFirst and last name cannot be empty.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n')
 		return
 	}
 
@@ -390,8 +393,77 @@ func updateUserName(reader *bufio.Reader, session *AppSession) {
 	reader.ReadString('\n')
 }
 
-func updateUserMobile(reader *bufio.Reader, session *AppSession) { /* ... */ }
-func updateUserEmail(reader *bufio.Reader, session *AppSession)  { /* ... */ }
+func updateUserMobile(reader *bufio.Reader, session *AppSession) {
+	fmt.Print("\nPlease enter your new mobile number: ")
+	newMobile, _ := reader.ReadString('\n')
+	newMobile = strings.TrimSpace(newMobile)
+
+	// Validate the new mobile number
+	if newMobile == "" {
+		fmt.Println("\nNew mobile number cannot be empty.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n')
+		return
+	} else if !isValidMobileNumber(newMobile) {
+		fmt.Println("\nInvalid mobile number. Please enter only numbers.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n')
+		return
+	}
+
+	// Prepare the request payload
+	updateData := map[string]string{
+		"email":  session.Email, // Use the email from the session for user identification
+		"mobile": newMobile,
+	}
+
+	// Include the mobile number in the update data
+	updateData["mobile"] = newMobile
+
+	jsonData, err := json.Marshal(updateData)
+	if err != nil {
+		fmt.Println("Error marshaling update data:", err)
+		return
+	}
+
+	// Create a new PATCH request to update the user's mobile number
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5000/updateMobile", bytes.NewBuffer(jsonData)) // Adjust the URL as needed
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Send the PATCH request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Failed to update mobile number. Status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	fmt.Println("\nMobile number updated successfully.")
+	fmt.Println("Press 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
+}
+
+func isValidMobileNumber(number string) bool {
+	for _, r := range number {
+		if !unicode.IsDigit(r) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func updateUserEmail(reader *bufio.Reader, session *AppSession) { /* ... */ }
 
 func updatePassengerCapacity(reader *bufio.Reader, session *AppSession) {
 	fmt.Print("Please enter the new number of passengers your car can accommodate: ")

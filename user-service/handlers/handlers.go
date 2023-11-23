@@ -175,3 +175,33 @@ func UpdateUser(db *gorm.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(user)
 	}
 }
+
+func UpdateUserMobile(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Define a struct to decode the request body
+		var updateMobileRequest struct {
+			Email  string `json:"email"`
+			Mobile string `json:"mobile"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&updateMobileRequest); err != nil {
+			http.Error(w, "Error decoding request: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Perform the update operation
+		result := db.Model(&models.User{}).
+			Where("email = ?", updateMobileRequest.Email).
+			Update("mobile", updateMobileRequest.Mobile)
+		if result.Error != nil {
+			http.Error(w, "Failed to update mobile number: "+result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Send a response back to the client
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"result": "Mobile number updated successfully",
+		})
+	}
+}
