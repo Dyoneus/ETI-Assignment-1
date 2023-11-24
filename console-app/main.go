@@ -28,6 +28,28 @@ func main() {
 	var session AppSession // A variable to hold the session information
 
 	for {
+		if session.Email == "" {
+			// If there is no email in the session, show the login/signup options
+			switch loginOrSignUp(reader) {
+			case "login":
+				session = logIn(reader)
+			case "signup":
+				signUp(reader)
+			case "exit":
+				fmt.Println("Exiting the application. Goodbye!")
+				return
+			}
+		} else {
+			// If there is an email in the session, the user is logged in, show the main menu
+			showMainMenu(reader, &session)
+		}
+	}
+}
+
+func loginOrSignUp(reader *bufio.Reader) string {
+	// Show options to login, sign up, or exit
+	// Return the user's choice
+	for {
 		fmt.Println("\n===========================================================")
 		fmt.Println("Welcome to the Car-Pooling Service Console Application!")
 		fmt.Println("===========================================================")
@@ -42,15 +64,11 @@ func main() {
 
 		switch choice {
 		case "1":
-			signUp(reader)
+			return "signup"
 		case "2":
-			session = logIn(reader) // Capture the session information after logging in
-			if session.Email != "" {
-				showMainMenu(reader, &session)
-			}
+			return "login"
 		case "3":
-			fmt.Println("\nExiting the application. Goodbye!")
-			return
+			return "exit"
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
 			fmt.Println("Press 'Enter' to return to the main menu...")
@@ -318,7 +336,7 @@ func updateUserProfile(reader *bufio.Reader, session *AppSession) {
 		case "3":
 			updateUserEmail(reader, session)
 		case "4":
-			//deleteAccount(reader, session)
+			deleteAccount(reader, session)
 			return // Return to main menu after deleting the account
 		case "5":
 			return // Return to main menu
@@ -536,5 +554,51 @@ func updateDriversLicense(reader *bufio.Reader, session *AppSession) { /* ... */
 func updateCarPlate(reader *bufio.Reader, session *AppSession)       { /* ... */ }
 
 func deleteAccount(reader *bufio.Reader, session *AppSession) {
-	// Confirm deletion and send a DELETE request to the user-service
+	// Confirm account deletion
+	fmt.Println("\nAre you sure you want to de-activate your account? This action cannot be undone. (y/n)")
+	response, _ := reader.ReadString('\n')
+	response = strings.TrimSpace(response)
+
+	// Check if the user confirmed the deletion
+	if strings.ToLower(response) != "y" {
+		fmt.Println("\nAccount de-activation cancelled.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n')
+		return
+	}
+
+	// Send a PATCH request to mark the account as inactive
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5000/deleteAccount", nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+
+	// Assuming you're sending the email as an identification of the user to be deleted
+	q := req.URL.Query()
+	q.Add("email", session.Email)
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request to delete account:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Handle the response
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Failed to delete account. Status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	fmt.Println("\nAccount marked as inactive successfully.")
+	fmt.Println("Thank you for your time with us! We hope to see you again soon")
+
+	// Clear the session data
+	*session = AppSession{}
+
+	fmt.Println("Press 'Enter' to return to login menu...")
+	reader.ReadString('\n')
+	loginOrSignUp(reader)
 }

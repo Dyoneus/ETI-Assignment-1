@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/mail"
+	"time"
 	"user-service/models"
 
 	"github.com/gorilla/mux"
@@ -241,5 +242,34 @@ func UpdateUserEmail(db *gorm.DB) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Email updated successfully")
+	}
+}
+
+func DeleteUserAccount(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		email := r.URL.Query().Get("email")
+		if email == "" {
+			http.Error(w, "Email is required", http.StatusBadRequest)
+			return
+		}
+
+		var user models.User
+		if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+
+		// Assume we have a field `Active` in the User model to mark the account as inactive
+		user.Active = false
+		now := time.Now()
+		user.DeletedAt = gorm.DeletedAt{Time: now, Valid: true} // Set the DeletedAt to current time for soft delete
+
+		if err := db.Save(&user).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "User account deleted successfully")
 	}
 }

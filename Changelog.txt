@@ -2,6 +2,17 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+[1.0.4] - 24/11/2023
+Added
+    - De-activate account function now soft-delete the user session instead of deleting it from the database
+Changed
+    - Login page now checks for active session logic, otherwise, show main menu
+Fixed
+    - Error "user.Active undefined" user struc lacks an Active field that the code attempts to access or modify.
+    - Error "cannot use &now (type of *time.Time) as type gorm.DeletedAt" indicate a type mismatch.
+    - User session not cleared after de-activating account
+    - After de-activating account, user is not sent back to the login menu
+
 [1.0.3] - 23/11/2023
 Added
     - Added variable session to simulate saved session
