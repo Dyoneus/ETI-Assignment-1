@@ -226,7 +226,8 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			fmt.Println("3. View Enrolled Trips")
 			fmt.Println("4. View Past Trips")
 			fmt.Println("5. Update Profile")
-			fmt.Println("6. Log Out")
+			fmt.Println("6. Sign up to become a Car Owner and Publish your own Trips!")
+			fmt.Println("7 Log Out")
 		}
 
 		fmt.Print("\nEnter your choice: ")
@@ -263,6 +264,10 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 				updateUserProfile(reader, session)
 			}
 		case "6":
+			if session.UserType == "passenger" {
+				becomeCarOwner(reader, session)
+			}
+		case "7":
 			return
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
@@ -272,7 +277,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 	}
 }
 
-// SECTION 1: UPDATE PROFILE MENU
+// SECTION 5: UPDATE PROFILE MENU
 func updateCarOwnerProfile(reader *bufio.Reader, session *AppSession) {
 	for {
 		fmt.Println("\nWhat would you like to update?")
@@ -293,9 +298,9 @@ func updateCarOwnerProfile(reader *bufio.Reader, session *AppSession) {
 		case "1":
 			updateUserName(reader, session)
 		case "2":
-			//updateUserMobile(reader, session)
+			updateUserMobile(reader, session)
 		case "3":
-			//updateUserEmail(reader, session)
+			updateUserEmail(reader, session)
 		case "4":
 			//updatePassengerCapacity(reader, session)
 		case "5":
@@ -303,7 +308,7 @@ func updateCarOwnerProfile(reader *bufio.Reader, session *AppSession) {
 		case "6":
 			//updateCarPlate(reader, session)
 		case "7":
-			//deleteAccount(reader, session)
+			deleteAccount(reader, session)
 			return // Return to main menu after deleting the account
 		case "8":
 			return // Return to main menu
@@ -550,8 +555,12 @@ func updatePassengerCapacity(reader *bufio.Reader, session *AppSession) {
 	fmt.Print("Please enter the new number of passengers your car can accommodate: ")
 }
 
-func updateDriversLicense(reader *bufio.Reader, session *AppSession) { /* ... */ }
-func updateCarPlate(reader *bufio.Reader, session *AppSession)       { /* ... */ }
+func updateDriversLicense(reader *bufio.Reader, session *AppSession) {
+	/* ... */
+}
+func updateCarPlate(reader *bufio.Reader, session *AppSession) {
+	/* ... */
+}
 
 func deleteAccount(reader *bufio.Reader, session *AppSession) {
 	// Confirm account deletion
@@ -601,4 +610,55 @@ func deleteAccount(reader *bufio.Reader, session *AppSession) {
 	fmt.Println("Press 'Enter' to return to login menu...")
 	reader.ReadString('\n')
 	loginOrSignUp(reader)
+}
+
+// SECTION 6: Upgrade to Car Owner
+func becomeCarOwner(reader *bufio.Reader, session *AppSession) {
+	fmt.Print("Please enter your driver's license number: ")
+	driversLicense, _ := reader.ReadString('\n')
+	driversLicense = strings.TrimSpace(driversLicense)
+
+	fmt.Print("Please enter your car plate number: ")
+	carPlateNumber, _ := reader.ReadString('\n')
+	carPlateNumber = strings.TrimSpace(carPlateNumber)
+
+	// Validate the input
+	if driversLicense == "" || carPlateNumber == "" {
+		fmt.Println("\nDriver's license number and car plate number cannot be empty.")
+		fmt.Println("Press 'Enter' to return to the main menu...")
+		reader.ReadString('\n')
+		return
+	}
+
+	// Prepare the request payload
+	upgradeData := map[string]string{
+		"email":            session.Email,
+		"drivers_license":  driversLicense,
+		"car_plate_number": carPlateNumber,
+	}
+
+	jsonData, err := json.Marshal(upgradeData)
+	if err != nil {
+		fmt.Println("Error marshaling data:", err)
+		return
+	}
+
+	resp, err := http.Post("http://localhost:5000/upgradeToCarOwner", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error making request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("\nSuccessfully upgraded to car owner.")
+		session.UserType = "car_owner"
+	} else {
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Printf("\nFailed to upgrade to car owner. Status code: %d, Message: %s\n", resp.StatusCode, string(body))
+	}
+
+	fmt.Println("Press 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
+	showMainMenu(reader, session)
 }

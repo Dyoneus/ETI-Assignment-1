@@ -2,6 +2,14 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+[1.0.5] - 26/11/2023
+Added
+    - User can now become car owner through signing up
+Changed
+    
+Fixed
+    - User now shown menu for car owner after successfully signing up as car owner
+
 [1.0.4] - 24/11/2023
 Added
     - De-activate account function now soft-delete the user session instead of deleting it from the database

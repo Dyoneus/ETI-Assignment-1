@@ -273,3 +273,58 @@ func DeleteUserAccount(db *gorm.DB) http.HandlerFunc {
 		fmt.Fprintln(w, "User account deleted successfully")
 	}
 }
+
+func UpgradeToCarOwner(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var upgradeRequest struct {
+			Email          string `json:"email"`
+			DriversLicense string `json:"drivers_license"`
+			CarPlateNumber string `json:"car_plate_number"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&upgradeRequest); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// Retrieve the userID from the user's email
+		var user models.User
+		if err := db.Where("email = ?", upgradeRequest.Email).First(&user).Error; err != nil {
+			// Handle error, e.g., user not found
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		// Begin a transaction
+		tx := db.Begin()
+
+		// Insert into car_owner_profiles
+		carOwnerProfile := models.CarOwnerProfile{
+			UserID:         user.ID, // Use the ID from the User struct
+			DriversLicense: upgradeRequest.DriversLicense,
+			CarPlateNumber: upgradeRequest.CarPlateNumber,
+		}
+
+		if err := tx.Create(&carOwnerProfile).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Failed to insert car owner profile: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Update the user_type in users table
+		if err := tx.Model(&models.User{}).Where("id = ?", user.ID).Update("user_type", "car_owner").Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Failed to update user type to car owner: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Commit the transaction
+		if err := tx.Commit().Error; err != nil {
+			http.Error(w, "Transaction failed: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "User upgraded to car owner successfully")
+	}
+}

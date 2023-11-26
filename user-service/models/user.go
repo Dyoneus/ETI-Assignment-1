@@ -20,7 +20,7 @@ type User struct {
 
 // CarOwnerProfile represents a car owner's profile, extending the User model.
 type CarOwnerProfile struct {
-	UserID         uint   `gorm:"primaryKey"`
+	UserID         uint   `gorm:"primaryKey;autoIncrement:false"`
 	DriversLicense string `json:"drivers_license"`
 	CarPlateNumber string `json:"car_plate_number"`
 }

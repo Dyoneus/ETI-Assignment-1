@@ -42,6 +42,9 @@ func main() {
 	r.HandleFunc("/updateEmail", handlers.UpdateUserEmail(db)).Methods("PATCH")
 	r.HandleFunc("/deleteAccount", handlers.DeleteUserAccount(db)).Methods("PATCH")
 
+	// Handlers for upgrading to car owner
+	r.HandleFunc("/upgradeToCarOwner", handlers.UpgradeToCarOwner(db)).Methods("POST")
+
 	// Start the server.
 	log.Println("Starting user service on port 5000...")
 	if err := http.ListenAndServe(":5000", r); err != nil {
