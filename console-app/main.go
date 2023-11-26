@@ -227,7 +227,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			fmt.Println("4. View Past Trips")
 			fmt.Println("5. Update Profile")
 			fmt.Println("6. Sign up to become a Car Owner and Publish your own Trips!")
-			fmt.Println("7 Log Out")
+			fmt.Println("7. Log Out")
 		}
 
 		fmt.Print("\nEnter your choice: ")
@@ -257,8 +257,9 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			//viewPastTrips(reader)
 		case "5":
 			if session.UserType == "car_owner" {
-				fmt.Println("\nReturning to the main menu.")
-				return
+				fmt.Println("\nLogging out.")
+				*session = AppSession{} // Clear the session data
+				return                  // Exit the showMainMenu function
 			} else {
 				fmt.Println("\nGoing to update passenger profile.")
 				updateUserProfile(reader, session)
@@ -268,7 +269,11 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 				becomeCarOwner(reader, session)
 			}
 		case "7":
-			return
+			if session.UserType == "passenger" {
+				fmt.Println("\nLogging out.")
+				*session = AppSession{} // Clear the session data
+				return                  // Exit the showMainMenu function
+			}
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
 			fmt.Println("Press 'Enter' to continue...")

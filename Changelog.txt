@@ -9,6 +9,7 @@ Changed
     
 Fixed
     - User now shown menu for car owner after successfully signing up as car owner
+    - Car owner menu now successfully log out
 
 [1.0.4] - 24/11/2023
 Added
