@@ -245,6 +245,84 @@ func UpdateUserEmail(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
+// UpdateDriversLicense updates the driver's license number of the car owner profile.
+func UpdateDriversLicense(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Decode the request body
+		var updateRequest struct {
+			Email          string `json:"email"`
+			DriversLicense string `json:"drivers_license"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&updateRequest); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// Validate the input
+		if updateRequest.Email == "" || updateRequest.DriversLicense == "" {
+			http.Error(w, "Email and driver's license number are required", http.StatusBadRequest)
+			return
+		}
+
+		// Update the driver's license number in the car_owner_profiles table
+		result := db.Model(&models.CarOwnerProfile{}).
+			Where("user_id = (SELECT id FROM users WHERE email = ?)", updateRequest.Email).
+			Update("drivers_license", updateRequest.DriversLicense)
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if result.RowsAffected == 0 {
+			http.Error(w, "No car owner profile found for the given email", http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Driver's license updated successfully")
+	}
+}
+
+// UpdateCarPlate updates the car plate number of the car owner profile.
+func UpdateCarPlate(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Decode the request body
+		var updateRequest struct {
+			Email          string `json:"email"`
+			CarPlateNumber string `json:"car_plate_number"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&updateRequest); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// Validate the input
+		if updateRequest.Email == "" || updateRequest.CarPlateNumber == "" {
+			http.Error(w, "Email and car plate number are required", http.StatusBadRequest)
+			return
+		}
+
+		// Update the car plate number in the car_owner_profiles table
+		result := db.Model(&models.CarOwnerProfile{}).
+			Where("user_id = (SELECT id FROM users WHERE email = ?)", updateRequest.Email).
+			Update("car_plate_number", updateRequest.CarPlateNumber)
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if result.RowsAffected == 0 {
+			http.Error(w, "No car owner profile found for the given email", http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Car plate number updated successfully")
+	}
+}
+
 func DeleteUserAccount(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		email := r.URL.Query().Get("email")

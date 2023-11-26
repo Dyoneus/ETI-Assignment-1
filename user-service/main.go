@@ -41,6 +41,8 @@ func main() {
 	r.HandleFunc("/updateMobile", handlers.UpdateUserMobile(db)).Methods("PATCH")
 	r.HandleFunc("/updateEmail", handlers.UpdateUserEmail(db)).Methods("PATCH")
 	r.HandleFunc("/deleteAccount", handlers.DeleteUserAccount(db)).Methods("PATCH")
+	r.HandleFunc("/updateDriversLicense", handlers.UpdateDriversLicense(db)).Methods("PATCH")
+	r.HandleFunc("/updateCarPlate", handlers.UpdateCarPlate(db)).Methods("PATCH")
 
 	// Handlers for upgrading to car owner
 	r.HandleFunc("/upgradeToCarOwner", handlers.UpgradeToCarOwner(db)).Methods("POST")

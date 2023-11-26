@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 [1.0.5] - 26/11/2023
 Added
     - User can now become car owner through signing up
+    - Car owner users can now change their license plate
+    - Car owner users can now change their driver license number
 Changed
     
 Fixed

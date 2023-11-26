@@ -289,11 +289,10 @@ func updateCarOwnerProfile(reader *bufio.Reader, session *AppSession) {
 		fmt.Println("1. Name")
 		fmt.Println("2. Mobile Number")
 		fmt.Println("3. Email Address")
-		fmt.Println("4. Number of Passengers")
-		fmt.Println("5. Driver's License Number")
-		fmt.Println("6. Car Plate Number")
-		fmt.Println("7. Delete Account")
-		fmt.Println("8. Return to Main Menu")
+		fmt.Println("4. Driver's License Number")
+		fmt.Println("5. Car Plate Number")
+		fmt.Println("6. Delete Account")
+		fmt.Println("7. Return to Main Menu")
 
 		fmt.Print("\nEnter your choice: ")
 		choice, _ := reader.ReadString('\n')
@@ -307,15 +306,13 @@ func updateCarOwnerProfile(reader *bufio.Reader, session *AppSession) {
 		case "3":
 			updateUserEmail(reader, session)
 		case "4":
-			//updatePassengerCapacity(reader, session)
+			updateDriversLicense(reader, session)
 		case "5":
-			//updateDriversLicense(reader, session)
+			updateCarPlate(reader, session)
 		case "6":
-			//updateCarPlate(reader, session)
-		case "7":
 			deleteAccount(reader, session)
 			return // Return to main menu after deleting the account
-		case "8":
+		case "7":
 			return // Return to main menu
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
@@ -556,15 +553,103 @@ func isValidEmail(email string) bool {
 	return err == nil
 }
 
-func updatePassengerCapacity(reader *bufio.Reader, session *AppSession) {
-	fmt.Print("Please enter the new number of passengers your car can accommodate: ")
+func updateDriversLicense(reader *bufio.Reader, session *AppSession) {
+	fmt.Print("\nPlease enter your new driver's license number: ")
+	newLicense, _ := reader.ReadString('\n')
+	newLicense = strings.TrimSpace(newLicense)
+
+	// Add input validation here
+
+	// Prepare the request data
+	requestData := map[string]string{
+		"email":           session.Email,
+		"drivers_license": newLicense,
+	}
+
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		fmt.Println("Error marshaling request data:", err)
+		return
+	}
+
+	// Send the update request to the server
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5000/updateDriversLicense", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Execute the request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Handle the response
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("Driver's license number updated successfully.")
+	} else {
+		fmt.Printf("Failed to update driver's license number. Status code: %d\n", resp.StatusCode)
+	}
+
+	// Read the 'Enter' key to pause
+	fmt.Println("Press 'Enter' to continue...")
+	reader.ReadString('\n')
 }
 
-func updateDriversLicense(reader *bufio.Reader, session *AppSession) {
-	/* ... */
-}
 func updateCarPlate(reader *bufio.Reader, session *AppSession) {
-	/* ... */
+	fmt.Print("\nPlease enter your new car plate number: ")
+	newPlate, _ := reader.ReadString('\n')
+	newPlate = strings.TrimSpace(newPlate)
+
+	// Add input validation here
+
+	// Prepare the request data to match the JSON fields expected by the server
+	requestData := map[string]string{
+		"email":            session.Email,
+		"car_plate_number": newPlate,
+	}
+
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		fmt.Println("Error marshaling request data:", err)
+		return
+	}
+
+	// Send the update request to the server
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5000/updateCarPlate", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Execute the request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Handle the response
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("Car plate number updated successfully.")
+	} else {
+		var response map[string]string
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			fmt.Println("Error decoding response data:", err)
+		} else {
+			fmt.Printf("Failed to update car plate number. Status code: %d, Message: %s\n", resp.StatusCode, response["message"])
+		}
+	}
+
+	// Read the 'Enter' key to pause
+	fmt.Println("Press 'Enter' to continue...")
+	reader.ReadString('\n')
 }
 
 func deleteAccount(reader *bufio.Reader, session *AppSession) {
@@ -588,7 +673,6 @@ func deleteAccount(reader *bufio.Reader, session *AppSession) {
 		return
 	}
 
-	// Assuming you're sending the email as an identification of the user to be deleted
 	q := req.URL.Query()
 	q.Add("email", session.Email)
 	req.URL.RawQuery = q.Encode()
