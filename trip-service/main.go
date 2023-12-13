@@ -1,19 +1,37 @@
 // By Ong Jia Yuan S10227735B
-// /trip-service/main.go
+// trip-service/main.go
 package main
 
 import (
 	"log"
 	"net/http"
+	"trip-service/database"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Initialize the router.
+	db, err := database.InitializeDatabase()
+	if err != nil {
+		log.Fatalf("Could not connect to the database: %v", err)
+	}
+
+	// Retrieve the generic database object sql.DB to close it later
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("Could not get database: %v", err)
+	}
+
+	// Defer the closure of the sqlDB
+	defer sqlDB.Close()
+
 	r := mux.NewRouter()
 
-	// The setup code would be very similar to the user-service's main.go
+	// Routes and handlers here
+	//r.HandleFunc("/trips", handlers.PublishTrip(db)).Methods("POST")
+
+	// Routes for other endpoints
+
 	log.Println("Starting trip service on port 5001...")
 	if err := http.ListenAndServe(":5001", r); err != nil {
 		log.Fatalf("Could not start server: %v", err)
