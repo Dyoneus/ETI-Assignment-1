@@ -10,17 +10,19 @@ import (
 	"net/http"
 	"net/mail" // Parsing email address
 	"os"
+	"strconv"
 	"strings"
+	"time"
 	"unicode"
 )
 
 // Simulate the idea of a session retaining the user's information
 type AppSession struct {
+	UserID    uint
 	Email     string
 	UserType  string
 	FirstName string
 	LastName  string
-	Password  string
 }
 
 func main() {
@@ -184,7 +186,10 @@ func logIn(reader *bufio.Reader) (session AppSession) {
 		}
 
 		var loginResponse struct {
-			UserType string `json:"userType"`
+			UserID    uint   `json:"userID"`
+			UserType  string `json:"userType"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
 		}
 		// Unmarshal the JSON response into the loginResponse struct
 		err = json.Unmarshal(responseBody, &loginResponse)
@@ -195,8 +200,11 @@ func logIn(reader *bufio.Reader) (session AppSession) {
 
 		// Store user's email and type in the session
 		session = AppSession{
-			Email:    email,
-			UserType: loginResponse.UserType,
+			UserID:    loginResponse.UserID, // Store the UserID in the session
+			Email:     email,
+			UserType:  loginResponse.UserType,
+			FirstName: loginResponse.FirstName,
+			LastName:  loginResponse.LastName,
 		}
 		showMainMenu(reader, &session)
 	} else {
@@ -237,7 +245,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 		switch choice {
 		case "1":
 			if session.UserType == "car_owner" {
-				//publishTrip(reader)
+				publishTrip(reader, session)
 			} else {
 				//browseTrips(reader)
 			}
@@ -750,4 +758,133 @@ func becomeCarOwner(reader *bufio.Reader, session *AppSession) {
 	fmt.Println("Press 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 	showMainMenu(reader, session)
+}
+
+// SECTION 7: Publish Trips
+func publishTrip(reader *bufio.Reader, session *AppSession) {
+	if session.UserType != "car_owner" {
+		fmt.Println("Only car owners can publish trips.")
+		return
+	}
+
+	fmt.Println("Enter trip details to publish your trip:")
+
+	// Capture pick-up location
+	fmt.Print("Pick Up Location: ")
+	pickUpLocation, _ := reader.ReadString('\n')
+	pickUpLocation = strings.TrimSpace(pickUpLocation)
+
+	// Capture alternative pick-up location
+	fmt.Print("Alternative Pick Up Location (if any, press enter to skip): ")
+	alternativePickUp, _ := reader.ReadString('\n')
+	alternativePickUp = strings.TrimSpace(alternativePickUp)
+
+	// Capture start traveling time
+	fmt.Print("Start Traveling Time (format DD-MM-YYYY HH:MM): ")
+	travelStartTime, _ := reader.ReadString('\n')
+	travelStartTime = strings.TrimSpace(travelStartTime)
+	// Define the layout string to match input format
+	const layout = "02-01-2006 15:04"
+	// Parse the travelStartTime using the specified layout
+	parsedTime, err := time.Parse(layout, travelStartTime)
+	if err != nil {
+		fmt.Println("Invalid travel start time format:", err)
+		return
+	}
+	if time.Until(parsedTime) < 30*time.Minute {
+		fmt.Println("Travel start time must be at least 30 minutes in the future.")
+		return
+	}
+
+	// Capture destination address
+	fmt.Print("Destination Address: ")
+	destinationAddress, _ := reader.ReadString('\n')
+	destinationAddress = strings.TrimSpace(destinationAddress)
+
+	// Capture number of passengers car can accommodate
+	fmt.Print("Number of Passengers Car Can Accommodate: ")
+	availableSeatsStr, _ := reader.ReadString('\n')
+	availableSeatsStr = strings.TrimSpace(availableSeatsStr)
+	// Convert availableSeats from string to int
+	availableSeats, err := strconv.Atoi(availableSeatsStr)
+	if err != nil {
+		fmt.Println("Invalid number of seats. Please enter a valid number.")
+		return
+	}
+
+	// Validate input data
+	if !isValidTripInput(pickUpLocation, alternativePickUp, travelStartTime, destinationAddress, availableSeats) {
+		fmt.Println("Invalid input. Please try again.")
+		return
+	}
+
+	// Convert car_owner_id to uint before adding it to the payload
+	carOwnerID := uint(session.UserID)
+	// Prepare the request payload
+	tripData := map[string]interface{}{
+		"car_owner_id":        carOwnerID,
+		"car_owner_name":      session.FirstName + " " + session.LastName,
+		"pick_up_location":    pickUpLocation,
+		"alternative_pick_up": alternativePickUp,
+		"travel_start_time":   parsedTime,
+		"destination_address": destinationAddress,
+		"available_seats":     availableSeats,
+	}
+
+	jsonData, err := json.Marshal(tripData)
+	if err != nil {
+		fmt.Println("Error marshaling trip data:", err)
+		return
+	}
+
+	// Send the POST request
+	resp, err := http.Post("http://localhost:5001/trips", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error sending trip publication request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Handle the response
+	if resp.StatusCode == http.StatusCreated {
+		fmt.Println("Trip published successfully.")
+	} else {
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Printf("Failed to publish trip. Status code: %d, Message: %s\n", resp.StatusCode, string(body))
+	}
+}
+
+// isValidTripInput checks if the provided trip details are valid.
+func isValidTripInput(pickUpLocation, alternativePickUp, travelStartTime, destinationAddress string, availableSeats int) bool {
+	// Check if the required strings are not empty
+	if pickUpLocation == "" || destinationAddress == "" {
+		return false
+	}
+
+	// If an alternative pick-up is provided, ensure it's not empty
+	if alternativePickUp != "" && strings.TrimSpace(alternativePickUp) == "" {
+		return false
+	}
+
+	/*
+		// Validate travel start time
+		travelTime, err := time.Parse("2006-01-02 15:04:05", travelStartTime)
+		if err != nil {
+			fmt.Println("Invalid travel start time format:", err)
+			return false
+		}
+
+		if time.Until(travelTime) < 30*time.Minute {
+			fmt.Println("Travel start time must be at least 30 minutes in the future.")
+			return false
+		}
+	*/
+
+	// Validate available seats
+	if availableSeats <= 0 {
+		fmt.Println("Number of available seats must be a positive number.")
+		return false
+	}
+
+	return true
 }

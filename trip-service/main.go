@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"trip-service/database"
+	"trip-service/handlers"
 
 	"github.com/gorilla/mux"
 )
@@ -28,7 +29,7 @@ func main() {
 	r := mux.NewRouter()
 
 	// Routes and handlers here
-	//r.HandleFunc("/trips", handlers.PublishTrip(db)).Methods("POST")
+	r.HandleFunc("/trips", handlers.PublishTrip(db)).Methods("POST")
 
 	// Routes for other endpoints
 

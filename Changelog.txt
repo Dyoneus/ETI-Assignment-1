@@ -2,6 +2,31 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+[1.0.7] - 14/12/2023
+Introduces the ability for car owners to publish new trips.
+The Trip model has been updated to include the `CarOwnerName` and `PickUpLocation` fields, ensuring that all necessary trip information is captured and stored.
+
+Key changes include:
+- Updated the Trip struct with new fields in `trip-service/models/trip.go`.
+- Modified the `publishTrip` function in `console-app/main.go` to collect additional
+  trip details and pass them to the trip service.
+- Enhanced the `PublishTrip` handler in `trip-service/handlers/handlers.go` to handle
+  the new fields and create trip records in the database.
+- Ensured that the `AutoMigrate` function is called upon application start to reflect
+  the new schema in the database.
+
+The database schema has been automatically updated using GORM's `AutoMigrate` feature to include the new fields without the need for manual migrations.
+
+[1.0.6] - 13/12/2023
+Initialize Trip Service with Basic Routing and Database Setup
+
+This commit sets up the foundational structure for the Trip Service in our car-pooling platform microservice architecture. It includes:
+
+- Creation of the main.go file with initial route setup using gorilla/mux.
+- Configuration of the database connection and auto-migration in database.go.
+- A placeholder for future trip publishing functionality in handlers.go, prepared to handle POST requests for '/trips'.
+- Basic configuration for starting the server on port 5001 and handling shutdown.
+
 [1.0.5] - 26/11/2023
 Added
     - User can now become car owner through signing up

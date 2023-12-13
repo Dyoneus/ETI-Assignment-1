@@ -86,9 +86,15 @@ func Login(db *gorm.DB) http.HandlerFunc {
 
 		// If login is successful, create a response struct with the UserType
 		response := struct {
-			UserType string `json:"userType"`
+			UserID    uint   `json:"userID"`
+			UserType  string `json:"userType"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
 		}{
-			UserType: user.UserType,
+			UserID:    user.ID,
+			UserType:  user.UserType,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
 		}
 
 		// Set Content-Type header to application/json
