@@ -254,7 +254,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			if session.UserType == "car_owner" {
 				manageTrips(reader, session)
 			} else {
-				//enrollInTrip(reader)
+				enrollInTrip(reader, session)
 			}
 		case "3":
 			if session.UserType == "car_owner" {
@@ -1111,44 +1111,116 @@ func viewPastTrips(reader *bufio.Reader) {
 }
 
 // SECTION 10: Browse Trips (For Passengers)
-func browseTrips(reader *bufio.Reader) {
-	// Define the endpoint URL for available trips
+// Fetches available trips from the server and returns them
+func getAvailableTrips() ([]models.Trip, error) {
 	url := "http://localhost:5001/available-trips"
-
-	// Make an HTTP GET request to the server's endpoint
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("Error fetching available trips: %v\n", err)
-		return
+		return nil, fmt.Errorf("Error fetching available trips: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Check the status code
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error fetching trips, server responded with status code: %d\n", resp.StatusCode)
-		return
+		return nil, fmt.Errorf("Error fetching trips, server responded with status code: %d", resp.StatusCode)
 	}
 
-	// Decode the JSON response into a slice of Trip structs
 	var trips []models.Trip
 	if err := json.NewDecoder(resp.Body).Decode(&trips); err != nil {
-		fmt.Printf("Error decoding available trips response: %v\n", err)
+		return nil, fmt.Errorf("Error decoding available trips response: %v", err)
+	}
+
+	return trips, nil
+}
+
+func browseTrips(reader *bufio.Reader) {
+	trips, err := getAvailableTrips()
+	if err != nil {
+		fmt.Println("Error fetching available trips:", err)
 		return
 	}
 
-	// Display the available trips
 	if len(trips) == 0 {
 		fmt.Println("No available trips found.")
-	} else {
-		fmt.Println("\nAvailable Trips:")
-		for _, trip := range trips {
-			fmt.Printf("Trip ID: %d, From: %s, To: %s, On: %s, Seats Left: %d\n",
-				trip.ID, trip.PickUpLocation, trip.DestinationAddress,
-				trip.TravelStartTime.Format("02-01-2006 15:04"), trip.AvailableSeats)
-		}
+		return
 	}
 
-	// Provide an option to return to the main menu
+	fmt.Println("\nAvailable Trips:")
+	for _, trip := range trips {
+		fmt.Printf("Trip ID: %d, From: %s, To: %s, On: %s, Seats Left: %d\n",
+			trip.ID, trip.PickUpLocation, trip.DestinationAddress,
+			trip.TravelStartTime.Format("02-01-2006 15:04"), trip.AvailableSeats)
+	}
+
 	fmt.Println("\nPress 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
+}
+
+// SECTION 11: Enroll in a trip (For Passengers)
+func enrollInTrip(reader *bufio.Reader, session *AppSession) {
+	trips, err := getAvailableTrips()
+	if err != nil {
+		fmt.Println("Error fetching available trips:", err)
+		return
+	}
+
+	if len(trips) == 0 {
+		fmt.Println("No available trips found.")
+		return
+	}
+
+	fmt.Println("\nAvailable Trips:")
+	for i, trip := range trips {
+		fmt.Printf("%d: %s to %s at %s, Available Seats: %d\n", i+1, trip.PickUpLocation, trip.DestinationAddress, trip.TravelStartTime.Format("02-01-2006 15:04"), trip.AvailableSeats)
+	}
+
+	fmt.Print("\nEnter the number of the trip ID you want to enroll in or '0' to return: ")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	choice, err := strconv.Atoi(input)
+	if err != nil || choice <= 0 || choice > len(trips) {
+		fmt.Println("Invalid choice.")
+		return
+	}
+
+	selectedTrip := trips[choice-1]
+
+	// Enroll the passenger in the selected trip
+	err = enrollPassengerInTrip(session.UserID, selectedTrip.ID)
+	if err != nil {
+		//fmt.Println("Error enrolling in trip:", err)
+		if strings.Contains(err.Error(), "already enrolled") {
+			fmt.Println("You are already enrolled in this trip.")
+			reader.ReadString('\n')
+		}
+		return
+	}
+
+	fmt.Println("\nEnrollment successful.")
+	reader.ReadString('\n')
+}
+
+// Function to enroll a passenger in a trip, sending data to the server
+func enrollPassengerInTrip(passengerID, tripID uint) error {
+	enrollmentData := map[string]uint{
+		"passenger_id": passengerID,
+		"trip_id":      tripID,
+	}
+
+	jsonData, err := json.Marshal(enrollmentData)
+	if err != nil {
+		return fmt.Errorf("error marshaling enrollment data: %v", err)
+	}
+
+	resp, err := http.Post("http://localhost:5001/enroll", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("error sending enrollment request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("failed to enroll in trip. Status code: %d, Message: %s", resp.StatusCode, string(body))
+	}
+
+	return nil
 }

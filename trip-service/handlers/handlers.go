@@ -118,3 +118,75 @@ func AvailableTrips(db *gorm.DB) http.HandlerFunc {
 		}
 	}
 }
+
+func EnrollInTrip(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var enrollmentData struct {
+			PassengerID uint `json:"passenger_id"`
+			TripID      uint `json:"trip_id"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&enrollmentData); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// Start a transaction
+		tx := db.Begin()
+
+		var trip models.Trip
+		if err := tx.First(&trip, enrollmentData.TripID).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Trip not found", http.StatusNotFound)
+			return
+		}
+
+		// Check if there are available seats
+		if trip.AvailableSeats <= 0 {
+			tx.Rollback()
+			http.Error(w, "No available seats", http.StatusConflict)
+			return
+		}
+
+		// Check if the user is already enrolled in the trip
+		if alreadyEnrolled(db, enrollmentData.PassengerID, enrollmentData.TripID) {
+			http.Error(w, "User is already enrolled in this trip", http.StatusBadRequest)
+			return
+		}
+
+		// Reduce available seats and increase enrolled passengers
+		trip.AvailableSeats--
+		trip.EnrolledPassengers++
+
+		if err := tx.Save(&trip).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Failed to update trip", http.StatusInternalServerError)
+			return
+		}
+
+		// Create a reservation
+		reservation := models.Reservation{
+			TripID:      trip.ID,
+			PassengerID: enrollmentData.PassengerID,
+		}
+
+		if err := tx.Create(&reservation).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Failed to create reservation", http.StatusInternalServerError)
+			return
+		}
+
+		// Commit the transaction
+		tx.Commit()
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Enrolled in trip successfully")
+	}
+}
+
+func alreadyEnrolled(db *gorm.DB, passengerID, tripID uint) bool {
+	// Query the reservations table for an entry with passengerID and tripID
+	var count int64
+	db.Table("reservations").Where("passenger_id = ? AND trip_id = ?", passengerID, tripID).Count(&count)
+	return count > 0
+}

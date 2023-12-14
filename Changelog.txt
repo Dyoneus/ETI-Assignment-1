@@ -1,12 +1,18 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
+[1.1.1] - 14/12/2023
+ - Fixed type mismatch in already.
+ - Enrolled function and ensured each passenger can only enroll once per trip. 
+ - Transaction handling in enroll function ensures data integrity for seat reservation and counts.
+
 [1.1.0] - 14/12/2023
 - Implemented a new endpoint `/available-trips` that lists all non-deleted trips with available seats. 
 - This allows passengers to browse through all currently available trips they can enroll in. 
 - The endpoint filters trips using the `deleted_at IS NULL AND available_seats > 0` condition, ensuring only active and open trips are shown.
 
 Modified the handlers and route configurations to serve the new endpoint. The Trip model's soft deletion and available seats features are utilized to provide the correct data.
+
 [1.0.9] - 14/12/2023
 - Implemented the 'viewPastTrips' function in the main console application, enabling users to list all trips that have been soft-deleted. 
 - Fetches the past trips from the backend server and displays them to the user with relevant details such as Trip ID, pickup location, destination, and scheduled time. 
