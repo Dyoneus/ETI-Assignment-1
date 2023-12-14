@@ -764,11 +764,11 @@ func becomeCarOwner(reader *bufio.Reader, session *AppSession) {
 // SECTION 7: Publish Trips (For Car Owner)
 func publishTrip(reader *bufio.Reader, session *AppSession) {
 	if session.UserType != "car_owner" {
-		fmt.Println("Only car owners can publish trips.")
+		fmt.Println("\nOnly car owners can publish trips.")
 		return
 	}
 
-	fmt.Println("Enter trip details to publish your trip:")
+	fmt.Println("\nEnter trip details to publish your trip:")
 
 	// Capture pick-up location
 	fmt.Print("Pick Up Location: ")
@@ -787,7 +787,8 @@ func publishTrip(reader *bufio.Reader, session *AppSession) {
 	// Define the layout string to match input format
 	const layout = "02-01-2006 15:04"
 	// Parse the travelStartTime using the specified layout
-	parsedTime, err := time.Parse(layout, travelStartTime)
+	loc, _ := time.LoadLocation("Asia/Singapore")
+	parsedTime, err := time.ParseInLocation(layout, travelStartTime, loc)
 	if err != nil {
 		fmt.Println("Invalid travel start time format:", err)
 		return

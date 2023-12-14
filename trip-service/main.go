@@ -5,11 +5,30 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 	"trip-service/database"
 	"trip-service/handlers"
+	"trip-service/models"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
+
+// Check current time to published trip that is past scheduled time
+func scheduleTripDeletion(db *gorm.DB) {
+	ticker := time.NewTicker(1 * time.Minute)
+	for {
+		select {
+		case <-ticker.C:
+			now := time.Now()
+			var trips []models.Trip
+			db.Where("travel_start_time < ? AND deleted_at IS NULL", now).Find(&trips)
+			for _, trip := range trips {
+				db.Model(&trip).Update("DeletedAt", now)
+			}
+		}
+	}
+}
 
 func main() {
 	db, err := database.InitializeDatabase()
@@ -25,6 +44,9 @@ func main() {
 
 	// Defer the closure of the sqlDB
 	defer sqlDB.Close()
+
+	// Start the routine to schedule trip deletions
+	go scheduleTripDeletion(db)
 
 	r := mux.NewRouter()
 
