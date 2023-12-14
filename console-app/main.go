@@ -26,9 +26,14 @@ type AppSession struct {
 	LastName  string
 }
 
+var activeSession bool
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	var session AppSession // A variable to hold the session information
+
+	// Initialize activeSession as false by default
+	activeSession = false
 
 	for {
 		if session.Email == "" {
@@ -36,6 +41,7 @@ func main() {
 			switch loginOrSignUp(reader) {
 			case "login":
 				session = logIn(reader)
+				activeSession = session.Email != ""
 			case "signup":
 				signUp(reader)
 			case "exit":
@@ -45,6 +51,7 @@ func main() {
 		} else {
 			// If there is an email in the session, the user is logged in, show the main menu
 			showMainMenu(reader, &session)
+			activeSession = session.Email != ""
 		}
 	}
 }
@@ -228,7 +235,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			fmt.Println("3. Update Profile")
 			fmt.Println("4. View Past Trips")
 			fmt.Println("5. Log Out")
-		} else { // Default to passenger menu
+		} else if session.UserType == "passenger" { // Default to passenger menu
 			fmt.Println("\nPassenger Menu:")
 			fmt.Println("1. Browse Trips")
 			fmt.Println("2. Enroll in a Trip")
@@ -237,6 +244,8 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			fmt.Println("5. Update Profile")
 			fmt.Println("6. Sign up to become a Car Owner and Publish your own Trips!")
 			fmt.Println("7. Log Out")
+		} else {
+			return
 		}
 
 		fmt.Print("\nEnter your choice: ")
@@ -280,6 +289,10 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			}
 		case "7":
 			if session.UserType == "passenger" {
+				fmt.Println("\nLogging out.")
+				*session = AppSession{} // Clear the session data
+				activeSession = false   // Update the flag as the session is no longer active
+				return                  // Exit the showMainMenu function
 			}
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
@@ -302,7 +315,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 				signUp(reader)
 			case "exit":
 				fmt.Println("Exiting the application. Goodbye!")
-				return // Exit the showMainMenu function
+				os.Exit(0) // Exit the showMainMenu function
 			}
 		}
 	}
