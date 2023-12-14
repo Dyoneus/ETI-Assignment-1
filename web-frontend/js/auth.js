@@ -11,6 +11,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     xhr.onload = function() {
         if (xhr.status === 200) {
             var userInfo = JSON.parse(xhr.responseText);
+            console.log(userInfo); // Log the userInfo object
             sessionStorage.setItem('user', JSON.stringify(userInfo));
             sessionStorage.setItem('userType', userInfo.userType);
             window.location.href = 'mainMenu.html'; // Redirect to main menu page

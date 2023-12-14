@@ -27,7 +27,7 @@
     window.onload = function() {
         var user = JSON.parse(sessionStorage.getItem('user'));
         if (user) {
-            document.getElementById('user-name').textContent = user.firstName; // Adjust if different
+            document.getElementById('user-name').textContent = user.first_name + ' ' + user.last_name;
             loadUserMenu();
         } else {
             console.log('No user information found. Redirecting to login.');
