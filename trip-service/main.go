@@ -49,6 +49,13 @@ func main() {
 	// Start the routine to schedule trip deletions
 	go scheduleTripDeletion(db)
 
+	// Setup CORS
+	headersOk := gorillaHandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOk := gorillaHandlers.AllowedOrigins([]string{"*"})
+	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	corsHandler := gorillaHandlers.CORS(originsOk, headersOk, methodsOk)
+
 	r := mux.NewRouter()
 
 	// Routes and handlers here
@@ -62,11 +69,8 @@ func main() {
 	r.HandleFunc("/enrolled-trips", handlers.GetEnrolledTripsHandler(db)).Methods("GET")
 	r.HandleFunc("/past-trips/passenger", handlers.GetPastTripsForPassenger(db)).Methods("GET")
 
-	// Setup CORS
-	corsOpts := gorillaHandlers.AllowedOrigins([]string{"*"})
-
 	log.Println("Starting trip service on port 5001...")
-	if err := http.ListenAndServe(":5001", gorillaHandlers.CORS(corsOpts)(r)); err != nil {
+	if err := http.ListenAndServe(":5001", corsHandler(r)); err != nil {
 		log.Fatalf("Could not start server: %v", err)
 	}
 }

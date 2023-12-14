@@ -29,6 +29,13 @@ func main() {
 
 	defer sqlDB.Close()
 
+	// Setup CORS
+	headersOk := gorillaHandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOk := gorillaHandlers.AllowedOrigins([]string{"*"})
+	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	corsHandler := gorillaHandlers.CORS(originsOk, headersOk, methodsOk)
+
 	// Set up the router.
 	r := mux.NewRouter()
 
@@ -49,12 +56,9 @@ func main() {
 	// Handlers for upgrading to car owner
 	r.HandleFunc("/upgradeToCarOwner", handlers.UpgradeToCarOwner(db)).Methods("POST")
 
-	// Setup CORS
-	corsOpts := gorillaHandlers.AllowedOrigins([]string{"*"})
-
 	// Apply the CORS middleware to our top-level router, with the OPTIONS method passed as a parameter.
-	log.Println("Starting user service on port 5000...")
-	if err := http.ListenAndServe(":5000", gorillaHandlers.CORS(corsOpts)(r)); err != nil {
+	log.Println("Starting server on port 5000...")
+	if err := http.ListenAndServe(":5000", corsHandler(r)); err != nil {
 		log.Fatalf("Could not start server: %v", err)
 	}
 }
