@@ -1,6 +1,10 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
+[2.0.1]
+Includes HTML files for user authentication, main menu navigation, profile management, and trip browsing/enrollment. 
+JavaScript files are added for handling AJAX calls to the backend services, managing session state, and dynamically updating the UI based on user interactions. 
+
 [2.0.0]
 This commit introduces the foundational for the frontend aspect of the Car Pooling Service application. 
 
