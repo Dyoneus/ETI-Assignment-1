@@ -86,3 +86,16 @@ func DeleteTrip(db *gorm.DB) http.HandlerFunc {
 		fmt.Fprintln(w, "Trip deleted successfully")
 	}
 }
+
+func ListSoftDeletedTrips(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var trips []models.Trip
+		if result := db.Unscoped().Where("deleted_at IS NOT NULL").Find(&trips); result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(trips)
+	}
+}

@@ -1,6 +1,12 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
+[1.0.9] - 14/12/2023
+- Implemented the 'viewPastTrips' function in the main console application, enabling users to list all trips that have been soft-deleted. 
+- Fetches the past trips from the backend server and displays them to the user with relevant details such as Trip ID, pickup location, destination, and scheduled time. 
+- Ensured error handling for server responses and empty lists, and provided a smooth return flow to the main menu after viewing the trips.
+- Auto-schedule to delete trips that is overdue
+
 [1.0.8] - 14/12/2023
 - Add ability to edit trip details including pick-up location, destination, and available seats.
 - Implement trip deletion with confirmation.

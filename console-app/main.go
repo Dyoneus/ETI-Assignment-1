@@ -263,7 +263,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 				//viewEnrolledTrips(reader)
 			}
 		case "4":
-			//viewPastTrips(reader)
+			viewPastTrips(reader)
 		case "5":
 			if session.UserType == "car_owner" {
 				fmt.Println("\nLogging out.")
@@ -1071,4 +1071,41 @@ func deleteTrip(tripID uint) {
 	}
 
 	fmt.Println("\nTrip deleted successfully.")
+}
+
+// SECTION 9: List all past trips
+func viewPastTrips(reader *bufio.Reader) {
+	resp, err := http.Get("http://localhost:5001/past-trips")
+	if err != nil {
+		fmt.Printf("Error fetching past trips: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error fetching past trips, server responded with status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	var trips []models.Trip
+	if err := json.NewDecoder(resp.Body).Decode(&trips); err != nil {
+		fmt.Printf("Error decoding past trips response: %v\n", err)
+		return
+	}
+
+	if len(trips) == 0 {
+		fmt.Println("No past trips found.")
+		return
+	}
+
+	fmt.Println("\nPast Trips:")
+	for _, trip := range trips {
+		fmt.Printf("Trip ID: %d, Car Owner: %s, From: %s, To: %s, On: %s, Seats: %d\n",
+			trip.ID, trip.CarOwnerName, trip.PickUpLocation, trip.DestinationAddress,
+			trip.TravelStartTime.Format("02-01-2006 15:04"), trip.AvailableSeats)
+	}
+
+	// Add any additional functionality, such as returning to the main menu or taking further action on past trips
+	fmt.Println("\nPress 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
 }
