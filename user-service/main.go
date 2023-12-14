@@ -10,6 +10,8 @@ import (
 	"user-service/database" // This imports the database package where InitializeDatabase is defined
 	"user-service/handlers"
 
+	// Alias gorilla handlers to avoid conflict
+	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -47,9 +49,12 @@ func main() {
 	// Handlers for upgrading to car owner
 	r.HandleFunc("/upgradeToCarOwner", handlers.UpgradeToCarOwner(db)).Methods("POST")
 
-	// Start the server.
+	// Setup CORS
+	corsOpts := gorillaHandlers.AllowedOrigins([]string{"*"})
+
+	// Apply the CORS middleware to our top-level router, with the OPTIONS method passed as a parameter.
 	log.Println("Starting user service on port 5000...")
-	if err := http.ListenAndServe(":5000", r); err != nil {
+	if err := http.ListenAndServe(":5000", gorillaHandlers.CORS(corsOpts)(r)); err != nil {
 		log.Fatalf("Could not start server: %v", err)
 	}
 }

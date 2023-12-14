@@ -1,11 +1,14 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
-[2.0.1]
-Includes HTML files for user authentication, main menu navigation, profile management, and trip browsing/enrollment. 
-JavaScript files are added for handling AJAX calls to the backend services, managing session state, and dynamically updating the UI based on user interactions. 
+[2.0.1] - 15/12/2023
+- Includes HTML files for user authentication, main menu navigation, profile management, and trip browsing/enrollment. 
+- JavaScript files are added for handling AJAX calls to the backend services, managing session state, and dynamically updating the UI based on user interactions. 
+- Added gorilla/handlers package to handle Cross-Origin Resource Sharing (CORS).
+- Configured the CORS middleware to allow all origins for development convenience.
+- Integrated the CORS middleware into the HTTP server setup.
 
-[2.0.0]
+[2.0.0] - 15/12/2023
 This commit introduces the foundational for the frontend aspect of the Car Pooling Service application. 
 
 - An index.html file has been created to serve as the entry point to the application, along with accompanying CSS and JavaScript files to manage the presentation and interactive behavior of the application.
