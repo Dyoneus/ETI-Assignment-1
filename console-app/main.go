@@ -248,7 +248,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			if session.UserType == "car_owner" {
 				publishTrip(reader, session)
 			} else {
-				//browseTrips(reader)
+				browseTrips(reader)
 			}
 		case "2":
 			if session.UserType == "car_owner" {
@@ -1106,6 +1106,49 @@ func viewPastTrips(reader *bufio.Reader) {
 	}
 
 	// Add any additional functionality, such as returning to the main menu or taking further action on past trips
+	fmt.Println("\nPress 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
+}
+
+// SECTION 10: Browse Trips (For Passengers)
+func browseTrips(reader *bufio.Reader) {
+	// Define the endpoint URL for available trips
+	url := "http://localhost:5001/available-trips"
+
+	// Make an HTTP GET request to the server's endpoint
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Error fetching available trips: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error fetching trips, server responded with status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	// Decode the JSON response into a slice of Trip structs
+	var trips []models.Trip
+	if err := json.NewDecoder(resp.Body).Decode(&trips); err != nil {
+		fmt.Printf("Error decoding available trips response: %v\n", err)
+		return
+	}
+
+	// Display the available trips
+	if len(trips) == 0 {
+		fmt.Println("No available trips found.")
+	} else {
+		fmt.Println("\nAvailable Trips:")
+		for _, trip := range trips {
+			fmt.Printf("Trip ID: %d, From: %s, To: %s, On: %s, Seats Left: %d\n",
+				trip.ID, trip.PickUpLocation, trip.DestinationAddress,
+				trip.TravelStartTime.Format("02-01-2006 15:04"), trip.AvailableSeats)
+		}
+	}
+
+	// Provide an option to return to the main menu
 	fmt.Println("\nPress 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 }

@@ -56,6 +56,7 @@ func main() {
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.EditTrip(db)).Methods("PATCH") // Added trip ID parameter
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.DeleteTrip(db)).Methods("DELETE")
 	r.HandleFunc("/past-trips", handlers.ListSoftDeletedTrips(db)).Methods("GET")
+	r.HandleFunc("/available-trips", handlers.AvailableTrips(db)).Methods("GET")
 
 	// Routes for other endpoints
 

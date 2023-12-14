@@ -99,3 +99,22 @@ func ListSoftDeletedTrips(db *gorm.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(trips)
 	}
 }
+
+func AvailableTrips(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var trips []models.Trip
+		// Assuming there's a DeletedAt field in the model to mark soft deleted records
+		// and an AvailableSeats field to show how many seats are left.
+		result := db.Where("deleted_at IS NULL AND available_seats > 0").Find(&trips)
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(trips); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
