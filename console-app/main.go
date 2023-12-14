@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"trip-service/models"
 	"unicode"
 )
 
@@ -251,7 +252,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			}
 		case "2":
 			if session.UserType == "car_owner" {
-				//manageTrips(reader)
+				manageTrips(reader, session)
 			} else {
 				//enrollInTrip(reader)
 			}
@@ -760,7 +761,7 @@ func becomeCarOwner(reader *bufio.Reader, session *AppSession) {
 	showMainMenu(reader, session)
 }
 
-// SECTION 7: Publish Trips
+// SECTION 7: Publish Trips (For Car Owner)
 func publishTrip(reader *bufio.Reader, session *AppSession) {
 	if session.UserType != "car_owner" {
 		fmt.Println("Only car owners can publish trips.")
@@ -887,4 +888,186 @@ func isValidTripInput(pickUpLocation, alternativePickUp, travelStartTime, destin
 	}
 
 	return true
+}
+
+// SECTION 8: Manage Trips (For Car Owner)
+func manageTrips(reader *bufio.Reader, session *AppSession) {
+	fmt.Println("\nManage Your Trips:")
+	trips := listTrips(session.UserID)
+	if trips == nil {
+		fmt.Println("No trips found or there was an error retrieving your trips.")
+		return // Go back to the main menu
+	}
+
+	// 1. List Trips
+	for i, trip := range trips {
+		fmt.Printf("%d: %s to %s at %s\n", i+1, trip.PickUpLocation, trip.DestinationAddress, trip.TravelStartTime.Format("02-01-2006 15:04"))
+	}
+
+	// 2. Ask for which trip to manage
+	fmt.Print("\nEnter the number of the trip you want to manage or '0' to return: ")
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	choice, _ := strconv.Atoi(input)
+
+	if choice == 0 {
+		return // Go back to the main menu
+	}
+
+	selectedTrip := trips[choice-1]
+
+	// 3. Edit or Delete Trip
+	fmt.Println("\n1. Edit Trip")
+	fmt.Println("2. Delete Trip")
+	fmt.Print("\nEnter your choice: ")
+	action, _ := reader.ReadString('\n')
+	action = strings.TrimSpace(action)
+
+	switch action {
+	case "1":
+		editTrip(reader, session, selectedTrip) // Implement this function to edit the trip
+	case "2":
+		deleteTrip(selectedTrip.ID) // Implement this function to delete the trip
+	default:
+		fmt.Println("Invalid choice.")
+	}
+}
+
+func listTrips(userID uint) []models.Trip {
+	// Log the URL for debugging purposes
+	url := fmt.Sprintf("http://localhost:5001/trips?carOwnerID=%d", userID)
+	//1fmt.Printf("Fetching trips from URL: %s\n", url)
+
+	// Make an HTTP GET request to the server's ListTrips endpoint
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Error fetching trips: %v\n", err)
+		return nil // Return nil to indicate an error occurred
+	}
+	defer resp.Body.Close()
+
+	// Check if the status code is not 'StatusOK'
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error fetching trips, server responded with status code: %d\n", resp.StatusCode)
+		return nil // Return nil to indicate an error occurred
+	}
+
+	// Decode the JSON response into a slice of Trip structs
+	var trips []models.Trip
+	if err := json.NewDecoder(resp.Body).Decode(&trips); err != nil {
+		fmt.Printf("Error decoding trips response: %v\n", err)
+		return nil // Return nil to indicate an error occurred
+	}
+
+	return trips
+}
+
+func editTrip(reader *bufio.Reader, session *AppSession, trip models.Trip) {
+	fmt.Println("Editing trip:", trip.ID)
+	fmt.Println("Leave input empty if you do not wish to change the value.")
+
+	// Capture pick-up location
+	fmt.Print("New Pick Up Location (current: " + trip.PickUpLocation + "): ")
+	pickUpLocation, _ := reader.ReadString('\n')
+	pickUpLocation = strings.TrimSpace(pickUpLocation)
+
+	if pickUpLocation != "" {
+		trip.PickUpLocation = pickUpLocation
+	}
+
+	// Capture alternative pick-up location
+	fmt.Print("New Alternative Pick Up Location (current: " + trip.AlternativePickUp + "): ")
+	alternativePickUp, _ := reader.ReadString('\n')
+	alternativePickUp = strings.TrimSpace(alternativePickUp)
+
+	if alternativePickUp != "" {
+		trip.AlternativePickUp = alternativePickUp
+	}
+
+	// Capture start traveling time
+	fmt.Print("New Start Traveling Time (format DD-MM-YYYY HH:MM, current: " + trip.TravelStartTime.Format("02-01-2006 15:04") + "): ")
+	travelStartTime, _ := reader.ReadString('\n')
+	travelStartTime = strings.TrimSpace(travelStartTime)
+
+	if travelStartTime != "" {
+		const layout = "02-01-2006 15:04"
+		parsedTime, err := time.Parse(layout, travelStartTime)
+		if err != nil {
+			fmt.Println("Invalid travel start time format:", err)
+			return
+		}
+		trip.TravelStartTime = parsedTime
+	}
+
+	// Capture destination address
+	fmt.Print("New Destination Address (current: " + trip.DestinationAddress + "): ")
+	destinationAddress, _ := reader.ReadString('\n')
+	destinationAddress = strings.TrimSpace(destinationAddress)
+
+	if destinationAddress != "" {
+		trip.DestinationAddress = destinationAddress
+	}
+
+	// Capture number of passengers car can accommodate
+	fmt.Print("New Number of Passengers Car Can Accommodate (current: " + strconv.Itoa(trip.AvailableSeats) + "): ")
+	availableSeatsStr, _ := reader.ReadString('\n')
+	availableSeatsStr = strings.TrimSpace(availableSeatsStr)
+
+	if availableSeatsStr != "" {
+		availableSeats, err := strconv.Atoi(availableSeatsStr)
+		if err != nil {
+			fmt.Println("Invalid number of seats. Please enter a valid number.")
+			return
+		}
+		trip.AvailableSeats = availableSeats
+	}
+
+	// Send the updated trip data to the backend
+	updatedTripData, err := json.Marshal(trip)
+	if err != nil {
+		fmt.Println("Error marshaling updated trip data:", err)
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, "http://localhost:5001/trips/"+strconv.Itoa(int(trip.ID)), bytes.NewBuffer(updatedTripData))
+	if err != nil {
+		fmt.Println("Error creating request to update trip:", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request to update trip:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Printf("Failed to update trip. Status code: %d, Message: %s\n", resp.StatusCode, string(body))
+		return
+	}
+
+	fmt.Println("\nTrip updated successfully.")
+}
+
+func deleteTrip(tripID uint) {
+	// HTTP DELETE request to the server's DeleteTrip endpoint
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("http://localhost:5001/trips/%d", tripID), nil)
+	if err != nil {
+		// handle error
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle error
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// handle error
+	}
+
+	fmt.Println("\nTrip deleted successfully.")
 }

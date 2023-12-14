@@ -30,6 +30,9 @@ func main() {
 
 	// Routes and handlers here
 	r.HandleFunc("/trips", handlers.PublishTrip(db)).Methods("POST")
+	r.HandleFunc("/trips", handlers.ListTrips(db)).Methods("GET")
+	r.HandleFunc("/trips/{id:[0-9]+}", handlers.EditTrip(db)).Methods("PATCH") // Added trip ID parameter
+	r.HandleFunc("/trips/{id:[0-9]+}", handlers.DeleteTrip(db)).Methods("DELETE")
 
 	// Routes for other endpoints
 

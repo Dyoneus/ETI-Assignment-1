@@ -1,6 +1,13 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
+[1.0.8] - 14/12/2023
+- Add ability to edit trip details including pick-up location, destination, and available seats.
+- Implement trip deletion with confirmation.
+- Resolve 404 error by correctly mapping trip ID in the request URL.
+- Ensure robust error handling for trip management operations.
+
+The commit includes necessary route adjustments in the trip service to accept trip IDs and updates to the corresponding functions in the console app to construct proper requests.
 
 [1.0.7] - 14/12/2023
 Introduces the ability for car owners to publish new trips.
