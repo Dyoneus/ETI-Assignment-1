@@ -8,13 +8,18 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <form id="loginForm">
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-        <!-- Add a button for signup, when clicked it will redirect to signup.html -->
-        <button type="button" onclick="location.href='signup.html'">Signup</button>
-    </form>
+    <div class="auth-container">
+        <div class="card">
+            <h2 class="auth-title">LOGIN</h2>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <label class="remember-me"><input type="checkbox"> Remember me?</label>
+                <button type="submit">LOGIN</button>
+                <p class="switch-auth">Need an account? <a href="signup.html">Sign Up</a></p>
+            </form>
+        </div>
+    </div>
     <script src="js/auth.js"></script>
 </body>
 </html>

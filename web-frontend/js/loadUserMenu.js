@@ -4,11 +4,11 @@ function loadUserMenu() {
     // Fetch the user type from session storage or an API call
     let userType = sessionStorage.getItem('userType'); // e.g., 'passenger' or 'car_owner'
     console.log('User type:', userType); // Debugging line
-    
+
     let menu = document.getElementById('user-menu');
 
     // Clear the menu
-    menu.innerHTML = ''; 
+    //menu.innerHTML = ''; 
 
     // Check if userType is null and handle the case
     if (!userType) {
@@ -16,17 +16,19 @@ function loadUserMenu() {
         window.location.href = 'login.html'; // Redirect to login page if userType is not set
         return;
     }
+    
+    menu.innerHTML = '<ul class="menu-list">';
 
     // Based on user type, add relevant menu items
     if (userType === 'car_owner') {
-        // Add car owner specific menu items
-        menu.innerHTML += '<button onclick="publishTrip()">Publish a Trip</button>';
-        // ... other menu items
+        menu.innerHTML += '<li><button onclick="publishTrip()">Publish a Trip</button></li>';
+        // Add other car owner menu items here
     } else if (userType === 'passenger') {
-        // Add passenger specific menu items
-        menu.innerHTML += '<button onclick="browseTrips()">Browse Trips</button>';
-        // ... other menu items
+        menu.innerHTML += '<li><button onclick="browseTrips()">Browse Trips</button></li>';
+        // Add other passenger menu items here
     }
+
+    menu.innerHTML += '</ul>';
 }
 // MENU OPTION FOR BOTH USER TYPES
 

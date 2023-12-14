@@ -12,7 +12,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         if (xhr.status === 200) {
             var userInfo = JSON.parse(xhr.responseText);
             sessionStorage.setItem('user', JSON.stringify(userInfo));
-            sessionStorage.setItem('userType', userInfo.userType); // Assuming userType is part of the userInfo object
+            sessionStorage.setItem('userType', userInfo.userType);
             window.location.href = 'mainMenu.html'; // Redirect to main menu page
         } else {
             alert('Login failed: ' + xhr.responseText);

@@ -1,6 +1,93 @@
 /* /web-frontend/css/styles.css */
 /* CSS file to add custom styles */
 
-body {
-    font-family: Arial, sans-serif;
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f4f8;
+}
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card {
+    background: white;
+    padding: 2em;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 300px;
+}
+
+/*Main Menu*/
+.user-menu .menu-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.user-menu .menu-list li {
+    margin-bottom: 10px;
+}
+
+.auth-title {
+    color: #333;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    padding: 10px;
+    margin-bottom: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px;
+    background: #ff4081;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 1em;
+}
+
+button:hover {
+    background: #e0356b; /* Darker button color on hover */
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.remember-me input[type="checkbox"] {
+    margin-right: 0.5em;
+}
+
+.switch-auth {
+    text-align: center;
+    margin-top: 0.5em;
+}
+
+.switch-auth a {
+    color: #ff4081;
+    text-decoration: none;
+}
+
+.switch-auth a:hover {
+    text-decoration: underline;
 }
