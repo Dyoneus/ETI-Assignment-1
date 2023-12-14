@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"trip-service/models"
 
 	"github.com/gorilla/mux"
@@ -212,6 +213,65 @@ func GetEnrolledTripsHandler(db *gorm.DB) http.HandlerFunc {
 		db.Where("id IN ?", tripIDs).Find(&trips)
 
 		// Send the trips back to the client
+		json.NewEncoder(w).Encode(trips)
+	}
+}
+
+func GetPastTripsForPassenger(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extract passengerID from query parameters
+		passengerIDParam := r.URL.Query().Get("passengerID")
+		if passengerIDParam == "" {
+			http.Error(w, "Passenger ID is required", http.StatusBadRequest)
+			return
+		}
+
+		// Convert passengerID to uint
+		passengerID, err := strconv.ParseUint(passengerIDParam, 10, 32)
+		if err != nil {
+			http.Error(w, "Invalid Passenger ID", http.StatusBadRequest)
+			return
+		}
+
+		// Query for past trips including soft-deleted ones
+		var trips []models.Trip
+		result := db.Unscoped().Table("trips").Joins("JOIN reservations ON reservations.trip_id = trips.id").
+			Where("reservations.passenger_id = ?", passengerID).
+			Find(&trips)
+
+		// Handle possible errors from the database query
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Return the trips as JSON
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(trips)
+	}
+}
+
+func ViewPastTripsForPassenger(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		passengerID := r.URL.Query().Get("passengerID")
+		if passengerID == "" {
+			http.Error(w, "Passenger ID is required", http.StatusBadRequest)
+			return
+		}
+
+		var trips []models.Trip
+		// Assuming `models.Reservation` has a `PassengerID` field and a `TripID` field.
+		// The `JOIN` operation is based on matching `TripID` in both `trips` and `reservations`.
+		result := db.Unscoped().Joins("JOIN reservations ON reservations.trip_id = trips.id").
+			Where("reservations.passenger_id = ?", passengerID).
+			Find(&trips)
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(trips)
 	}
 }

@@ -1,6 +1,12 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
+[1.1.3] - 14/12/2023
+- Implemented a new HTTP handler `GetPastTripsForPassenger` to retrieve all past trips associated with a passenger, including those that are soft-deleted. 
+- This handler responds to GET requests at the `/past-trips/passenger` endpoint with the `passengerID` as a query parameter.
+- Updated the `main.go` in the trip-service to register the new route and modified the `viewPastTripsForPassenger` function in the console app to utilize the new endpoint correctly.
+- This feature allows passengers to view a complete history of their trips, ensuring better transparency and record-keeping.
+
 [1.1.2] - 14/12/2023
 - Implement the 'viewEnrolledTrips' function in the console application.
 - Create an endpoint in the trip service to handle fetching of enrolled trips by passenger ID.

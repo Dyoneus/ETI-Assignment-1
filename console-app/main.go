@@ -263,7 +263,11 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 				viewEnrolledTrips(reader, session)
 			}
 		case "4":
-			viewPastTrips(reader)
+			if session.UserType == "car_owner" {
+				viewPastTrips(reader)
+			} else {
+				viewPastTripsForPassenger(reader, session)
+			}
 		case "5":
 			if session.UserType == "car_owner" {
 				fmt.Println("\nLogging out.")
@@ -282,6 +286,10 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 				fmt.Println("\nLogging out.")
 				*session = AppSession{} // Clear the session data
 				return                  // Exit the showMainMenu function
+			} else {
+				fmt.Println("\nLogging out.")
+				*session = AppSession{} // Clear the session data
+				return
 			}
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
@@ -849,10 +857,13 @@ func publishTrip(reader *bufio.Reader, session *AppSession) {
 
 	// Handle the response
 	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("Trip published successfully.")
+		fmt.Println("\nTrip published successfully.")
+		fmt.Println("Press 'Enter' to continue...")
+		reader.ReadString('\n')
 	} else {
 		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Printf("Failed to publish trip. Status code: %d, Message: %s\n", resp.StatusCode, string(body))
+		fmt.Printf("\nFailed to publish trip. Status code: %d, Message: %s\n", resp.StatusCode, string(body))
+		reader.ReadString('\n')
 	}
 }
 
@@ -928,7 +939,7 @@ func manageTrips(reader *bufio.Reader, session *AppSession) {
 	case "1":
 		editTrip(reader, session, selectedTrip) // Implement this function to edit the trip
 	case "2":
-		deleteTrip(selectedTrip.ID) // Implement this function to delete the trip
+		deleteTrip(reader, selectedTrip.ID) // Implement this function to delete the trip
 	default:
 		fmt.Println("Invalid choice.")
 	}
@@ -1051,9 +1062,10 @@ func editTrip(reader *bufio.Reader, session *AppSession, trip models.Trip) {
 	}
 
 	fmt.Println("\nTrip updated successfully.")
+	reader.ReadString('\n')
 }
 
-func deleteTrip(tripID uint) {
+func deleteTrip(reader *bufio.Reader, tripID uint) {
 	// HTTP DELETE request to the server's DeleteTrip endpoint
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("http://localhost:5001/trips/%d", tripID), nil)
 	if err != nil {
@@ -1071,9 +1083,11 @@ func deleteTrip(tripID uint) {
 	}
 
 	fmt.Println("\nTrip deleted successfully.")
+	fmt.Println("Press 'Enter' to continue...")
+	reader.ReadString('\n')
 }
 
-// SECTION 9: List all past trips
+// SECTION 9: List all past trips of all (For Car Owner)
 func viewPastTrips(reader *bufio.Reader) {
 	resp, err := http.Get("http://localhost:5001/past-trips")
 	if err != nil {
@@ -1094,7 +1108,9 @@ func viewPastTrips(reader *bufio.Reader) {
 	}
 
 	if len(trips) == 0 {
-		fmt.Println("No past trips found.")
+		fmt.Println("\nNo past trips found.")
+		fmt.Println("Press 'Enter' to continue...")
+		reader.ReadString('\n')
 		return
 	}
 
@@ -1106,6 +1122,49 @@ func viewPastTrips(reader *bufio.Reader) {
 	}
 
 	// Add any additional functionality, such as returning to the main menu or taking further action on past trips
+	fmt.Println("\nPress 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
+}
+
+// SECTION 9.1: List all past trips (For Passenger)
+func viewPastTripsForPassenger(reader *bufio.Reader, session *AppSession) {
+	// Define the endpoint URL for past trips for the current passenger
+	url := fmt.Sprintf("http://localhost:5001/past-trips/passenger?passengerID=%d", session.UserID)
+
+	// Make an HTTP GET request to the server's endpoint
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Error fetching past trips: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error fetching past trips, server responded with status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	// Decode the JSON response into a slice of Trip structs
+	var trips []models.Trip
+	if err := json.NewDecoder(resp.Body).Decode(&trips); err != nil {
+		fmt.Printf("Error decoding past trips response: %v\n", err)
+		return
+	}
+
+	// Display the past trips for the passenger
+	if len(trips) == 0 {
+		fmt.Println("\nNo past trips found.")
+	} else {
+		fmt.Println("\nPast Trips:")
+		for _, trip := range trips {
+			fmt.Printf("Trip ID: %d, Driver: %s, From: %s, To: %s, On: %s\n",
+				trip.ID, trip.CarOwnerName, trip.PickUpLocation, trip.DestinationAddress,
+				trip.TravelStartTime.Format("02-01-2006 15:04"))
+		}
+	}
+
+	// Provide an option to return to the main menu
 	fmt.Println("\nPress 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 }
@@ -1155,6 +1214,28 @@ func browseTrips(reader *bufio.Reader) {
 	reader.ReadString('\n')
 }
 
+// Function to fetch the trips that a passenger has enrolled in
+func fetchEnrolledTrips(reader *bufio.Reader, passengerID uint) ([]models.Trip, error) {
+	// Replace with the actual URL or API endpoint that returns the enrolled trips for a passenger
+	url := fmt.Sprintf("http://localhost:5001/enrolled-trips?passengerID=%d", passengerID)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching enrolled trips: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error fetching trips, server responded with status code: %d", resp.StatusCode)
+	}
+
+	var enrolledTrips []models.Trip
+	if err := json.NewDecoder(resp.Body).Decode(&enrolledTrips); err != nil {
+		return nil, fmt.Errorf("error decoding enrolled trips response: %v", err)
+	}
+
+	return enrolledTrips, nil
+}
+
 // SECTION 11: Enroll in a trip (For Passengers)
 func enrollInTrip(reader *bufio.Reader, session *AppSession) {
 	trips, err := getAvailableTrips()
@@ -1184,19 +1265,53 @@ func enrollInTrip(reader *bufio.Reader, session *AppSession) {
 
 	selectedTrip := trips[choice-1]
 
+	// Fetch the passenger's already enrolled trips
+	enrolledTrips, err := fetchEnrolledTrips(reader, session.UserID)
+	if err != nil {
+		fmt.Println("Error checking existing enrollments:", err)
+		return
+	}
+
+	// Check for time conflicts with each enrolled trip
+	for _, enrolledTrip := range enrolledTrips {
+		if doTripsOverlap(selectedTrip, enrolledTrip) { // Note that we pass each enrolledTrip individually
+			fmt.Println("\nYou have a time conflict with another trip you are enrolled in.")
+			fmt.Println("Press 'Enter' to continue...")
+			reader.ReadString('\n')
+			return
+		}
+	}
+
 	// Enroll the passenger in the selected trip
 	err = enrollPassengerInTrip(session.UserID, selectedTrip.ID)
 	if err != nil {
 		//fmt.Println("Error enrolling in trip:", err)
 		if strings.Contains(err.Error(), "already enrolled") {
 			fmt.Println("\nYou are already enrolled in this trip.")
+			fmt.Println("Press 'Enter' to continue...")
 			reader.ReadString('\n')
 		}
 		return
 	}
 
 	fmt.Println("\nEnrollment successful.")
+	fmt.Println("Press 'Enter' to continue...")
 	reader.ReadString('\n')
+}
+
+// doTripsOverlap checks if the selected trip overlaps with an already enrolled trip.
+func doTripsOverlap(selectedTrip models.Trip, enrolledTrip models.Trip) bool {
+	// Assume a fixed duration for the trip
+	duration := 1 * time.Hour // Example duration
+	selectedTripEnd := selectedTrip.TravelStartTime.Add(duration)
+
+	enrolledTripEnd := enrolledTrip.TravelStartTime.Add(duration)
+	// Check if the selected trip start time or end time falls between the start and end of the enrolled trip
+	if (selectedTrip.TravelStartTime.After(enrolledTrip.TravelStartTime) && selectedTrip.TravelStartTime.Before(enrolledTripEnd)) ||
+		(selectedTripEnd.After(enrolledTrip.TravelStartTime) && selectedTripEnd.Before(enrolledTripEnd)) {
+		return true // They overlap
+	}
+	return false // They don't overlap
 }
 
 // Function to enroll a passenger in a trip, sending data to the server
@@ -1253,7 +1368,7 @@ func viewEnrolledTrips(reader *bufio.Reader, session *AppSession) {
 
 	// Display the enrolled trips
 	if len(trips) == 0 {
-		fmt.Println("You are not enrolled in any trips.")
+		fmt.Println("\nYou are not enrolled in any trips.")
 	} else {
 		fmt.Println("\nEnrolled Trips:")
 		for _, trip := range trips {
@@ -1264,6 +1379,6 @@ func viewEnrolledTrips(reader *bufio.Reader, session *AppSession) {
 	}
 
 	// Provide an option to return to the main menu
-	fmt.Println("\nPress 'Enter' to return to the main menu...")
+	fmt.Println("Press 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 }
