@@ -21,7 +21,8 @@ body, html {
     padding: 2em;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    width: 300px;
+    width: 400px;
+    margin: auto;
 }
 
 /*Main Menu*/
@@ -90,4 +91,38 @@ button:hover {
 
 .switch-auth a:hover {
     text-decoration: underline;
+}
+
+/* Styling for the form inside the publish trip card */
+#publishTripForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#publishTripForm input[type="text"],
+#publishTripForm input[type="datetime-local"],
+#publishTripForm input[type="number"],
+#publishTripForm button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Handle the case where the input is not required and could be empty */
+#publishTripForm input:not([required]) {
+    background-color: #f8f8f8; /* Lighter background to indicate optional field */
+}
+
+#publishTripForm button {
+  background-color: #f06292; /* Pink color for the button */
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#publishTripForm button:hover {
+  background-color: #e91e63; /* Darker pink on hover */
 }

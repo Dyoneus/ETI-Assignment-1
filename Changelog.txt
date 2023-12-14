@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - Added gorilla/handlers package to handle Cross-Origin Resource Sharing (CORS).
 - Configured the CORS middleware to allow all origins for development convenience.
 - Integrated the CORS middleware into the HTTP server setup.
+- Added validation to ensure trip start times are set at least 30 minutes into the future.
+- Included logic to retrieve car owner details from the user session and add them to the trip data before publishing.
+- Fixed issues with form submission to prevent premature closure and ensure trip data is sent to the backend correctly.
 
 [2.0.0] - 15/12/2023
 This commit introduces the foundational for the frontend aspect of the Car Pooling Service application. 
