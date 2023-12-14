@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 - This handler responds to GET requests at the `/past-trips/passenger` endpoint with the `passengerID` as a query parameter.
 - Updated the `main.go` in the trip-service to register the new route and modified the `viewPastTripsForPassenger` function in the console app to utilize the new endpoint correctly.
 - This feature allows passengers to view a complete history of their trips, ensuring better transparency and record-keeping.
+- Implemented direct call to loginOrSignUp function upon logout in showMainMenu
+- Ensured that the user is immediately prompted for login or signup after logging out
+- Altered logout logic to reset session and handle user redirection seamlessly
+- Updated showMainMenu to accommodate the new flow for both car owner and passenger types
 
 [1.1.2] - 14/12/2023
 - Implement the 'viewEnrolledTrips' function in the console application.

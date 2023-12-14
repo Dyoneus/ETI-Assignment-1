@@ -270,9 +270,6 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			}
 		case "5":
 			if session.UserType == "car_owner" {
-				fmt.Println("\nLogging out.")
-				*session = AppSession{} // Clear the session data
-				return                  // Exit the showMainMenu function
 			} else {
 				fmt.Println("\nGoing to update passenger profile.")
 				updateUserProfile(reader, session)
@@ -283,18 +280,30 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			}
 		case "7":
 			if session.UserType == "passenger" {
-				fmt.Println("\nLogging out.")
-				*session = AppSession{} // Clear the session data
-				return                  // Exit the showMainMenu function
-			} else {
-				fmt.Println("\nLogging out.")
-				*session = AppSession{} // Clear the session data
-				return
 			}
 		default:
 			fmt.Println("\nInvalid choice, please try again.")
 			fmt.Println("Press 'Enter' to continue...")
 			reader.ReadString('\n')
+		}
+
+		if (session.UserType == "car_owner" && choice == "5") || (session.UserType == "passenger" && choice == "7") {
+			fmt.Println("\nLogging out.")
+			*session = AppSession{} // Clear the session data
+			fmt.Println("\nYou have been logged out.")
+			fmt.Println("Press 'Enter' to continue...")
+			reader.ReadString('\n')
+			// Directly call loginOrSignUp function
+			userChoice := loginOrSignUp(reader)
+			switch userChoice {
+			case "login":
+				*session = logIn(reader)
+			case "signup":
+				signUp(reader)
+			case "exit":
+				fmt.Println("Exiting the application. Goodbye!")
+				return // Exit the showMainMenu function
+			}
 		}
 	}
 }
