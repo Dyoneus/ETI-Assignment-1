@@ -1,0 +1,37 @@
+<!--  /web-frontend/mainMenu.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main Menu</title>
+    <script src="js/loadUserMenu.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Welcome, <span id="user-name">User</span>!</h1>
+        <button onclick="logout()">Logout</button>
+    </header>
+    
+    <nav id="user-menu">
+        <!-- User-specific navigation will be loaded here -->
+    </nav>
+    
+    <main id="main-content">
+        <!-- Dynamic content will be loaded here -->
+    </main>
+
+    <script>
+        window.onload = function() {
+            var user = JSON.parse(sessionStorage.getItem('user'));
+            if (user) {
+                document.getElementById('user-name').textContent = user.firstName; // Adjust if different
+                loadUserMenu();
+            } else {
+                console.log('No user information found. Redirecting to login.');
+                window.location.href = 'login.html';
+            }
+        };
+    </script>
+</body>
+</html>
