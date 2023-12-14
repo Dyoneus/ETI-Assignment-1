@@ -10,6 +10,7 @@ import (
 	"trip-service/handlers"
 	"trip-service/models"
 
+	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
@@ -61,10 +62,11 @@ func main() {
 	r.HandleFunc("/enrolled-trips", handlers.GetEnrolledTripsHandler(db)).Methods("GET")
 	r.HandleFunc("/past-trips/passenger", handlers.GetPastTripsForPassenger(db)).Methods("GET")
 
-	// Routes for other endpoints
+	// Setup CORS
+	corsOpts := gorillaHandlers.AllowedOrigins([]string{"*"})
 
 	log.Println("Starting trip service on port 5001...")
-	if err := http.ListenAndServe(":5001", r); err != nil {
+	if err := http.ListenAndServe(":5001", gorillaHandlers.CORS(corsOpts)(r)); err != nil {
 		log.Fatalf("Could not start server: %v", err)
 	}
 }
