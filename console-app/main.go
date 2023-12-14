@@ -260,7 +260,7 @@ func showMainMenu(reader *bufio.Reader, session *AppSession) {
 			if session.UserType == "car_owner" {
 				updateCarOwnerProfile(reader, session)
 			} else {
-				//viewEnrolledTrips(reader)
+				viewEnrolledTrips(reader, session)
 			}
 		case "4":
 			viewPastTrips(reader)
@@ -1146,8 +1146,8 @@ func browseTrips(reader *bufio.Reader) {
 
 	fmt.Println("\nAvailable Trips:")
 	for _, trip := range trips {
-		fmt.Printf("Trip ID: %d, From: %s, To: %s, On: %s, Seats Left: %d\n",
-			trip.ID, trip.PickUpLocation, trip.DestinationAddress,
+		fmt.Printf("Trip ID: %d, Driver: %s, Pick Up Location: %s, Destination Address: %s, Start Travelling Time: %s, Seats Left: %d\n",
+			trip.ID, trip.CarOwnerName, trip.PickUpLocation, trip.DestinationAddress,
 			trip.TravelStartTime.Format("02-01-2006 15:04"), trip.AvailableSeats)
 	}
 
@@ -1189,7 +1189,7 @@ func enrollInTrip(reader *bufio.Reader, session *AppSession) {
 	if err != nil {
 		//fmt.Println("Error enrolling in trip:", err)
 		if strings.Contains(err.Error(), "already enrolled") {
-			fmt.Println("You are already enrolled in this trip.")
+			fmt.Println("\nYou are already enrolled in this trip.")
 			reader.ReadString('\n')
 		}
 		return
@@ -1223,4 +1223,47 @@ func enrollPassengerInTrip(passengerID, tripID uint) error {
 	}
 
 	return nil
+}
+
+// SECTION 12: View Enrolled Trips (For Passengers)
+func viewEnrolledTrips(reader *bufio.Reader, session *AppSession) {
+	// Define the endpoint URL for enrolled trips
+	url := fmt.Sprintf("http://localhost:5001/enrolled-trips?passengerID=%d", session.UserID)
+
+	// Make an HTTP GET request to the server's endpoint
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Error fetching enrolled trips: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error fetching enrolled trips, server responded with status code: %d\n", resp.StatusCode)
+		return
+	}
+
+	// Decode the JSON response into a slice of Trip structs
+	var trips []models.Trip
+	if err := json.NewDecoder(resp.Body).Decode(&trips); err != nil {
+		fmt.Printf("Error decoding enrolled trips response: %v\n", err)
+		return
+	}
+
+	// Display the enrolled trips
+	if len(trips) == 0 {
+		fmt.Println("You are not enrolled in any trips.")
+	} else {
+		fmt.Println("\nEnrolled Trips:")
+		for _, trip := range trips {
+			fmt.Printf("Trip ID: %d, Driver: %s, Pick Up Location: %s, Destination Address: %s, Start Travelling Time: %s\n",
+				trip.ID, trip.CarOwnerName, trip.PickUpLocation, trip.DestinationAddress,
+				trip.TravelStartTime.Format("02-01-2006 15:04"))
+		}
+	}
+
+	// Provide an option to return to the main menu
+	fmt.Println("\nPress 'Enter' to return to the main menu...")
+	reader.ReadString('\n')
 }

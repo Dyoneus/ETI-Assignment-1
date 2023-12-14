@@ -190,3 +190,28 @@ func alreadyEnrolled(db *gorm.DB, passengerID, tripID uint) bool {
 	db.Table("reservations").Where("passenger_id = ? AND trip_id = ?", passengerID, tripID).Count(&count)
 	return count > 0
 }
+
+// Get all enrolled trips for a passenger
+func GetEnrolledTripsHandler(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extract passengerID from the query parameters
+		passengerID := r.URL.Query().Get("passengerID")
+
+		// Find all reservations for the passenger
+		var reservations []models.Reservation
+		db.Where("passenger_id = ?", passengerID).Find(&reservations)
+
+		// Extract trip IDs from reservations
+		var tripIDs []uint
+		for _, reservation := range reservations {
+			tripIDs = append(tripIDs, reservation.TripID)
+		}
+
+		// Find all trips corresponding to the trip IDs
+		var trips []models.Trip
+		db.Where("id IN ?", tripIDs).Find(&trips)
+
+		// Send the trips back to the client
+		json.NewEncoder(w).Encode(trips)
+	}
+}

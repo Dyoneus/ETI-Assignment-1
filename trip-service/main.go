@@ -58,6 +58,7 @@ func main() {
 	r.HandleFunc("/past-trips", handlers.ListSoftDeletedTrips(db)).Methods("GET")
 	r.HandleFunc("/available-trips", handlers.AvailableTrips(db)).Methods("GET")
 	r.HandleFunc("/enroll", handlers.EnrollInTrip(db)).Methods("POST")
+	r.HandleFunc("/enrolled-trips", handlers.GetEnrolledTripsHandler(db)).Methods("GET")
 
 	// Routes for other endpoints
 
