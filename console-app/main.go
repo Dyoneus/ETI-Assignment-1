@@ -1239,7 +1239,7 @@ func browseTrips(reader *bufio.Reader) {
 // Function to fetch the trips that a passenger has enrolled in
 func fetchEnrolledTrips(reader *bufio.Reader, passengerID uint) ([]models.Trip, error) {
 	// Replace with the actual URL or API endpoint that returns the enrolled trips for a passenger
-	url := fmt.Sprintf("http://localhost:5001/enrolled-trips?passengerID=%d", passengerID)
+	url := fmt.Sprintf("http://localhost:5001/enrolled-trips?passenger_id=%d", passengerID)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching enrolled trips: %v", err)
@@ -1365,7 +1365,7 @@ func enrollPassengerInTrip(passengerID, tripID uint) error {
 // SECTION 12: View Enrolled Trips (For Passengers)
 func viewEnrolledTrips(reader *bufio.Reader, session *AppSession) {
 	// Define the endpoint URL for enrolled trips
-	url := fmt.Sprintf("http://localhost:5001/enrolled-trips?passengerID=%d", session.UserID)
+	url := fmt.Sprintf("http://localhost:5001/enrolled-trips?passenger_id=%d", session.UserID)
 
 	// Make an HTTP GET request to the server's endpoint
 	resp, err := http.Get(url)
@@ -1401,6 +1401,6 @@ func viewEnrolledTrips(reader *bufio.Reader, session *AppSession) {
 	}
 
 	// Provide an option to return to the main menu
-	fmt.Println("Press 'Enter' to return to the main menu...")
+	fmt.Println("\nPress 'Enter' to return to the main menu...")
 	reader.ReadString('\n')
 }

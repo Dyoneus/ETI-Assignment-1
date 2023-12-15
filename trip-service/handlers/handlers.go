@@ -62,7 +62,7 @@ func EditTrip(db *gorm.DB) http.HandlerFunc {
 		}
 
 		// Log the trip object to check if ID is zero
-		fmt.Printf("Received trip for update: %+v\n", trip)
+		//fmt.Printf("Received trip for update: %+v\n", trip)
 
 		/*
 			// Log the trip ID and check it's not zero
@@ -227,11 +227,33 @@ func alreadyEnrolled(db *gorm.DB, passengerID, tripID uint) bool {
 func GetEnrolledTripsHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Extract passengerID from the query parameters
-		passengerID := r.URL.Query().Get("passengerID")
+		passengerID := r.URL.Query().Get("passenger_id") // Make sure this matches the frontend key
+
+		if passengerID == "" {
+			http.Error(w, "Passenger ID is required", http.StatusBadRequest)
+			return
+		}
+
+		// Convert passengerID to uint
+		pid, err := strconv.ParseUint(passengerID, 10, 32)
+		if err != nil {
+			http.Error(w, "Invalid Passenger ID", http.StatusBadRequest)
+			return
+		}
 
 		// Find all reservations for the passenger
 		var reservations []models.Reservation
-		db.Where("passenger_id = ?", passengerID).Find(&reservations)
+		if result := db.Where("passenger_id = ?", pid).Find(&reservations); result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// If no reservations found, return an empty array
+		if len(reservations) == 0 {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode([]models.Trip{})
+			return
+		}
 
 		// Extract trip IDs from reservations
 		var tripIDs []uint
@@ -241,10 +263,35 @@ func GetEnrolledTripsHandler(db *gorm.DB) http.HandlerFunc {
 
 		// Find all trips corresponding to the trip IDs
 		var trips []models.Trip
-		db.Where("id IN ?", tripIDs).Find(&trips)
+		if result := db.Where("id IN ?", tripIDs).Find(&trips); result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		// Send the trips back to the client
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(trips)
+		/*
+			// Extract passengerID from the query parameters
+			passengerID := r.URL.Query().Get("passengerID")
+
+			// Find all reservations for the passenger
+			var reservations []models.Reservation
+			db.Where("passenger_id = ?", passengerID).Find(&reservations)
+
+			// Extract trip IDs from reservations
+			var tripIDs []uint
+			for _, reservation := range reservations {
+				tripIDs = append(tripIDs, reservation.TripID)
+			}
+
+			// Find all trips corresponding to the trip IDs
+			var trips []models.Trip
+			db.Where("id IN ?", tripIDs).Find(&trips)
+
+			// Send the trips back to the client
+			json.NewEncoder(w).Encode(trips)
+		*/
 	}
 }
 

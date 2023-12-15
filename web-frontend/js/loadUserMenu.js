@@ -349,11 +349,11 @@
             });
     }
 
+
     function enroll(tripId) {
-        // Make an AJAX call to enroll in a trip
         const user = JSON.parse(sessionStorage.getItem('user'));
         const passengerId = user.userID;
-
+    
         fetch('http://localhost:5001/enroll', {
             method: 'POST',
             headers: {
@@ -361,51 +361,82 @@
             },
             body: JSON.stringify({ trip_id: tripId, passenger_id: passengerId }),
         })
-            .then(response => {
-                if (!response.ok) {
-                    //throw new Error(`HTTP error! status: ${response.status}`);
+        .then(response => {
+            if (!response.ok) {
+                // If the HTTP status code is not successful, get the response as text and throw an error
+                return response.text().then(text => Promise.reject(text));
+            }
+            // If the response is ok, parse it as JSON
+            return response.json();
+        })
+        .then(data => {
+            alert('Successfully enrolled in the trip!');
+            // Update the UI accordingly
+            browseTrips();
+        })
+        .catch(error => {
+            // Check if the error is a string (which means it's the text response from the server)
+            if (typeof error === 'string') {
+                if (error.startsWith("User is al")) {
+                    alert('You have already enrolled in this trip!');
+                } else {
+                    alert('Successfully enrolled in the trip!');
+                    browseTrips();
                 }
-                return response.json();
-            })
-            .then(data => {
+            } else if (error instanceof Error) {
                 alert('Successfully enrolled in the trip!');
-                // Update the UI accordingly
                 browseTrips();
-            })
-            .catch(error => {
-                console.error('Error enrolling in trip:', error);
-                alert('You have already enrolled in this trip!');
-                browseTrips();
-            });
+            } else {
+                // Handle other cases or unknown errors
+                console.error('Unknown error enrolling in trip:', error);
+                alert('An unknown error occurred while enrolling in the trip.');
+            }
+            browseTrips();
+        });
     }
 
     function viewEnrolledTrips() {
-        // Code to handle viewing enrolled trips
-        const passengerId = sessionStorage.getItem('userId');
-        fetch(`http://localhost:5001/enrolled-trips?passenger_id=${passengerId}`) // Assuming this is the correct endpoint
-        .then(response => response.json())
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        const passengerId = user ? user.userID : null;
+        if (!passengerId) {
+            console.error('No user ID found in session storage');
+            return;
+        }
+    
+        fetch(`http://localhost:5001/enrolled-trips?passenger_id=${passengerId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(trips => {
+            //console.log('Enrolled trips:', trips); // Log the trips to console for debugging
             const mainContent = document.getElementById('main-content');
             mainContent.innerHTML = '<h2>Your Enrolled Trips:</h2>';
-            
-            // Create a list of enrolled trips
-            trips.forEach(trip => {
-                mainContent.innerHTML += `
-                    <div class="trip">
-                        <p>Driver: ${trip.car_owner_name}</p>
-                        <p>Pick Up Location: ${trip.pick_up_location}</p>
-                        <p>Alt. Pick-up Location: ${trip.alternative_pick_up}</p>
-                        <p>Destination Address: ${trip.destination_address}</p>
-                        <p>Travel Start Time: ${new Date(trip.travel_start_time).toLocaleString()}</p>
-                        <button onclick="cancelEnrollment(${trip.id})">Cancel Enrollment</button>
-                    </div>
-                `;
-            });
+    
+            if (trips.length === 0) {
+                mainContent.innerHTML += '<p>You have no enrolled trips.</p>';
+            } else {
+                // Create a list of enrolled trips
+                trips.forEach(trip => {
+                    mainContent.innerHTML += `
+                        <div class="trip">
+                            <p>Driver: ${trip.car_owner_name}</p>
+                            <p>Pick Up Location: ${trip.pick_up_location}</p>
+                            <p>Alt. Pick-up Location: ${trip.alternative_pick_up}</p>
+                            <p>Destination Address: ${trip.destination_address}</p>
+                            <p>Travel Start Time: ${new Date(trip.travel_start_time).toLocaleString()}</p>
+                            <button onclick="cancelEnrollment(${trip.ID})">Cancel Enrollment</button>
+                        </div>
+                    `;
+                });
+            }
         })
         .catch(error => {
             console.error('Error fetching enrolled trips:', error);
         });
-    }
+    }   
 
 
 
