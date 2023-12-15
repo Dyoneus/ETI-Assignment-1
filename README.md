@@ -52,61 +52,67 @@ This project implements a car-pooling service platform using microservices archi
 By [Ong Jia Yuan]
 
 
+
+
+
+
+
+
 # Car-Pooling Service Platform - Task List
 
 1. User Account Creation
-+Status: Completed
-Details: Implementation allows both passengers and car owners to create accounts.
+- Status: Completed
+- Details: Implementation allows both passengers and car owners to create accounts.
 
 2. Default Passenger Profile Creation
-+Status: Completed
-Details: Users provide first name, last name, mobile number, and email address.
+- Status: Completed
+- Details: Users provide first name, last name, mobile number, and email address.
 
 3. Car Owner Profile Enhancement
-+Status: Completed
-Details: Passenger profiles can be upgraded to car owner profiles with additional details like driver’s license and car plate number.
+- Status: Completed
+- Details: Passenger profiles can be upgraded to car owner profiles with additional details like driver’s license and car plate number.
 
 4. Account Information Update
-+Status: Completed
-Details: Users can update their account information.
+- Status: Completed
+- Details: Users can update their account information.
 
 5. Account Deletion Post One Year
-+Status: Completed
-Details: Users can delete their accounts after 1 year, adhering to data retention policies.
+- Status: Completed
+- Details: Users can delete their accounts after 1 year, adhering to data retention policies.
 
 6. Trip Publishing by Car Owners
-+Status: Completed
-Details: Car owners can publish trips with detailed information including pick-up, alternative pick-up locations, start time, destination, and passenger capacity.
+- Status: Completed
+- Details: Car owners can publish trips with detailed information including pick-up, alternative pick-up locations, start time, destination, and passenger capacity.
 
 7. Trip Enrollment by Passengers
-+Status: Completed
-Details: Passengers can browse, search, and enroll in available trips with seat availability and no schedule conflicts.
+- Status: Completed
+- Details: Passengers can browse, search, and enroll in available trips with seat availability and no schedule conflicts.
 
 8. Trip Management by Car Owners
-+Status: Completed
-Details: Car owners can only start 30 minutes in the future of scheduled time
+- Status: Completed
+- Details: Car owners can only start 30 minutes in the future of scheduled time
 
 10. Retrieve Past Trips
-+Status: Completed
-Details: Users can access their past trips in reverse chronological order.
+- Status: Completed
+- Details: Users can access their past trips in reverse chronological order.
 
 ## Additional Features
 
 1. Password Hashing
-Status: <span style="color: green;">Completed</span>
-Details: Passwords are securely hashed during account creation and login.
+- Status: Completed
+- Details: Passwords are securely hashed during account creation and login.
 
 2. Automatic Trip Deletion
-Status: <span style="color: green;">Completed</span>
-Details: Past trips are automatically deleted from the system after their scheduled start time.
+- Status: Completed
+- Details: Past trips are automatically deleted from the system after their scheduled start time.
 
 3. Cancel Enrollment (Front-end)
-Status: <span style="color: green;">Completed</span>
-Details: Passengers can cancel their enrollment trip but will not be able to enroll in the same trip.
+- Status: Completed
+- Details: Passengers can cancel their enrollment trip but will not be able to enroll in the same trip.
 
 4. User Authentication (Front-end)
-Status: <span style="color: green;">Completed</span>
-Details: User who tries to enter the main menu page manually in the URL will automatically redirect to login page.
+- Status: Completed
+- Details: User who tries to enter the main menu page manually in the URL will automatically redirect to login page.
 
 This document will be updated as the project progresses, reflecting new implementations and enhancements.
 
