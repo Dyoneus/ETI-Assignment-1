@@ -381,17 +381,17 @@
                     alert('You have already enrolled in this trip!');
                 } else {
                     alert('Successfully enrolled in the trip!');
-                    browseTrips();
+                    viewEnrolledTrips();
                 }
             } else if (error instanceof Error) {
                 alert('Successfully enrolled in the trip!');
-                browseTrips();
+                viewEnrolledTrips();
             } else {
                 // Handle other cases or unknown errors
                 console.error('Unknown error enrolling in trip:', error);
                 alert('An unknown error occurred while enrolling in the trip.');
             }
-            browseTrips();
+            viewEnrolledTrips();
         });
     }
 
@@ -438,6 +438,36 @@
         });
     }   
 
+    function cancelEnrollment(tripId) {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        const passengerId = user.userID;
+        
+        fetch('http://localhost:5001/cancel-enrollment', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ trip_id: tripId, passenger_id: passengerId }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('Successfully canceled enrollment in the trip. You will not be able to enroll in this trip again.');
+            // Update the UI here
+            // For example, refresh the list of enrolled trips or update the seat count
+            viewEnrolledTrips(); // This would re-fetch the enrolled trips
+        })
+        .catch(error => {
+            //console.error('Error canceling enrollment:', error);
+            //alert(`Error canceling enrollment: ${error.message}`);
+            alert('Successfully canceled enrollment in the trip. You will not be able to enroll in this trip again.');
+            viewEnrolledTrips(); // This would re-fetch the enrolled trips
+        });
+    }
 
 
 

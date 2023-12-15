@@ -374,3 +374,66 @@ func GetTrip(db *gorm.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(trip)
 	}
 }
+
+func CancelEnrollment(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var cancelData struct {
+			PassengerID uint `json:"passenger_id"`
+			TripID      uint `json:"trip_id"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&cancelData); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// Start a transaction
+		tx := db.Begin()
+
+		// Find the trip to ensure it exists
+		var trip models.Trip
+		if err := tx.First(&trip, cancelData.TripID).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Trip not found", http.StatusNotFound)
+			return
+		}
+
+		// Check if the user is enrolled in the trip
+		var reservation models.Reservation
+		if err := tx.Where("passenger_id = ? AND trip_id = ?", cancelData.PassengerID, cancelData.TripID).First(&reservation).Error; err != nil {
+			tx.Rollback()
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				http.Error(w, "Reservation not found", http.StatusNotFound)
+			} else {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		// Mark the reservation as deleted
+		if err := tx.Model(&reservation).Update("deleted_at", gorm.Expr("NOW()")).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Failed to cancel enrollment", http.StatusInternalServerError)
+			return
+		}
+
+		// Update the trip's available seats and enrolled passengers
+		if err := tx.Model(&trip).Updates(map[string]interface{}{
+			"available_seats":     gorm.Expr("available_seats + ?", 1),
+			"enrolled_passengers": gorm.Expr("enrolled_passengers - ?", 1),
+		}).Error; err != nil {
+			tx.Rollback()
+			http.Error(w, "Failed to update trip", http.StatusInternalServerError)
+			return
+		}
+
+		// Commit the transaction
+		if err := tx.Commit().Error; err != nil {
+			http.Error(w, "Transaction commit failed", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Canceled enrollment successfully")
+	}
+}

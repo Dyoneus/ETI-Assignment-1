@@ -70,6 +70,8 @@ func main() {
 	r.HandleFunc("/enrolled-trips", handlers.GetEnrolledTripsHandler(db)).Methods("GET")
 	r.HandleFunc("/past-trips/passenger", handlers.GetPastTripsForPassenger(db)).Methods("GET")
 
+	r.HandleFunc("/cancel-enrollment", handlers.CancelEnrollment(db)).Methods("DELETE")
+
 	log.Println("Starting trip service on port 5001...")
 	if err := http.ListenAndServe(":5001", corsHandler(r)); err != nil {
 		log.Fatalf("Could not start server: %v", err)
