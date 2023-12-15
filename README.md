@@ -1,5 +1,8 @@
 # Car-Pooling Service Platform
+### Front-end
 ![Home Page](web-frontend/images/home.jpg)
+
+### Console Application
 ![Platform on Console](web-frontend/images/consolehome.png)
 
 ## Introduction
