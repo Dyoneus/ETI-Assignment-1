@@ -20,17 +20,14 @@ This project implements a car-pooling service platform using microservices archi
 - **Web Application**: Developed using HTML, CSS, and JavaScript.
 - **Interaction**: Communicates with backend microservices via AJAX calls.
 
-
-## Architecture Diagram
-![Architecture Diagram](web-frontend/images/architectureDiagram.jpg)
-
-
 ## Key Features
 
 - **Password Hashing**: Implements bcrypt hashing for secure password storage, ensuring user credentials are protected.
 - **Automated Trip Management**: The system automatically monitors trip schedules. Trips past their start time are automatically flagged and removed from active listings, ensuring data accuracy and relevancy.
 - **User Type Flexibility**: Users can sign up as passengers and later upgrade to car owners.
 
+## Architecture Diagram
+![Architecture Diagram](web-frontend/images/architectureDiagram.jpg)
 
 ## Setup and Running Instructions
 1. **Backend Services**:
