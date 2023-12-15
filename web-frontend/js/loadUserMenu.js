@@ -30,6 +30,7 @@
                 <li><button onclick="viewEnrolledTrips()">View Current Enrolled Trips</button></li>
                 <li><button onclick="loadPastTripsPassenger()">View Past Enrolled Trips</button></li>
                 <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
+                <li><button onclick="showUpgradeToCarOwnerForm()">Become Car Owner</button></li>
             `;
             // Add other passenger specific menu items here
         }
@@ -545,6 +546,63 @@
         .catch(error => console.error('Error loading past trips:', error));
     }
 
+    function showUpgradeToCarOwnerForm() {
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = `
+            <h2>Become a Car Owner</h2>
+            <form id="upgradeToCarOwnerForm">
+                <input type="text" id="drivers_license" placeholder="Driver's License Number" required>
+                <input type="text" id="car_plate_number" placeholder="Car Plate Number" required>
+                <button type="submit">Submit</button>
+            </form>
+        `;
+    
+        document.getElementById('upgradeToCarOwnerForm').addEventListener('submit', handleUpgradeToCarOwnerSubmission);
+    }
+
+
+    function handleUpgradeToCarOwnerSubmission(event) {
+        event.preventDefault();
+        const driversLicense = document.getElementById('drivers_license').value;
+        const carPlateNumber = document.getElementById('car_plate_number').value;
+    
+        // Retrieve user email from sessionStorage
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        const email = user.email;
+    
+        // Send POST request to the server
+        fetch('http://localhost:5000/upgradeToCarOwner', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                drivers_license: driversLicense,
+                car_plate_number: carPlateNumber,
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                // If the server responds with a textual error message, parse it as text
+                return response.text().then(text => Promise.reject(new Error(text)));
+            }
+            return response.json();
+        })
+        .then(() => {
+            alert('Successfully upgraded to car owner!');
+            // Update user type in sessionStorage
+            user.userType = 'car_owner';
+            sessionStorage.setItem('user', JSON.stringify(user));
+            // Refresh the menu to reflect the new user type
+            refreshMainMenu();
+        })
+        .catch(error => {
+            alert('Successfully upgraded to car owner! Please re-login to take effect.');
+            sessionStorage.clear(); // Clear session storage
+            window.location.href = 'login.html'; // Redirect to login page
+        });
+    }
 
 
 

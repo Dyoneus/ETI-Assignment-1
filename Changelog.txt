@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 - Update Go server handlers to provide routes for retrieving past trips based on user roles.
 - Fix URL construction in JavaScript fetch calls to match the server's expected endpoints.
 - Test and verify that past trips are correctly displayed in the user interface.
+- Implement the frontend feature that allows a passenger to upgrade their account to a car owner. The update involves collecting the driver's license and car plate number through a form and sending this data to the backend API without affecting the existing console application. 
+  The user session is updated upon successful upgrade, and the main menu is refreshed to reflect the new user type
 
 [2.0.1] - 15/12/2023
 - Includes HTML files for user authentication, main menu navigation, profile management, and trip browsing/enrollment. 
