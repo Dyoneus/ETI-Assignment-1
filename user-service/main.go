@@ -32,7 +32,7 @@ func main() {
 	// Setup CORS
 	headersOk := gorillaHandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	originsOk := gorillaHandlers.AllowedOrigins([]string{"*"})
-	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "PATCH", "POST", "DELETE", "OPTIONS"})
 
 	corsHandler := gorillaHandlers.CORS(originsOk, headersOk, methodsOk)
 

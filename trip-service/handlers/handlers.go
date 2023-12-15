@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -60,14 +61,44 @@ func EditTrip(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		// Perform update operation, assuming trip.ID is set
-		if result := db.Save(&trip); result.Error != nil {
-			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		// Log the trip object to check if ID is zero
+		fmt.Printf("Received trip for update: %+v\n", trip)
+
+		/*
+			// Log the trip ID and check it's not zero
+			fmt.Printf("Attempting to update trip with ID: %d\n", trip.ID)
+			if trip.ID == 0 {
+				http.Error(w, "Trip ID is zero", http.StatusBadRequest)
+				return
+			}
+		*/
+
+		// Fetch the existing trip from the database
+		var existingTrip models.Trip
+		if err := db.First(&existingTrip, trip.ID).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		// Update the trip with new data
+		if err := db.Model(&existingTrip).Updates(trip).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Trip updated successfully")
+
+		/*
+			// Perform update operation, assuming trip.ID is set
+			if result := db.Save(&trip); result.Error != nil {
+				http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, "Trip updated successfully")
+		*/
 	}
 }
 
@@ -273,5 +304,26 @@ func ViewPastTripsForPassenger(db *gorm.DB) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(trips)
+	}
+}
+
+// GetTrip handles GET requests for a single trip by ID
+func GetTrip(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		tripID := vars["id"]
+
+		var trip models.Trip
+		if result := db.First(&trip, "id = ?", tripID); result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				http.Error(w, "Trip not found", http.StatusNotFound)
+			} else {
+				http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(trip)
 	}
 }

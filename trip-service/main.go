@@ -52,7 +52,7 @@ func main() {
 	// Setup CORS
 	headersOk := gorillaHandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	originsOk := gorillaHandlers.AllowedOrigins([]string{"*"})
-	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "PATCH", "POST", "DELETE", "OPTIONS"})
 
 	corsHandler := gorillaHandlers.CORS(originsOk, headersOk, methodsOk)
 
@@ -62,6 +62,7 @@ func main() {
 	r.HandleFunc("/trips", handlers.PublishTrip(db)).Methods("POST")
 	r.HandleFunc("/trips", handlers.ListTrips(db)).Methods("GET")
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.EditTrip(db)).Methods("PATCH") // Added trip ID parameter
+	r.HandleFunc("/trips/{id:[0-9]+}", handlers.GetTrip(db)).Methods("GET")
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.DeleteTrip(db)).Methods("DELETE")
 	r.HandleFunc("/past-trips", handlers.ListSoftDeletedTrips(db)).Methods("GET")
 	r.HandleFunc("/available-trips", handlers.AvailableTrips(db)).Methods("GET")
