@@ -14,6 +14,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
             console.log(userInfo); // Log the userInfo object
             sessionStorage.setItem('user', JSON.stringify(userInfo));
             sessionStorage.setItem('userType', userInfo.userType);
+
             window.location.href = 'mainMenu.html'; // Redirect to main menu page
         } else {
             alert('Login failed: ' + xhr.responseText);

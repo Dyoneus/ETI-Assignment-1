@@ -90,11 +90,17 @@ func Login(db *gorm.DB) http.HandlerFunc {
 			UserType  string `json:"userType"`
 			FirstName string `json:"first_name"`
 			LastName  string `json:"last_name"`
+			Mobile    string `json:"mobile"`
+			Email     string `json:"email"`
+			Password  string `json:"password"`
 		}{
 			UserID:    user.ID,
 			UserType:  user.UserType,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
+			Mobile:    user.Mobile,
+			Email:     user.Email,
+			Password:  user.Password,
 		}
 
 		// Set Content-Type header to application/json

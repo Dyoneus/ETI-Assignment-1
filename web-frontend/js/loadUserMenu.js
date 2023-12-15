@@ -3,7 +3,7 @@
     function loadUserMenu() {
         // Fetch the user type from session storage or an API call
         let userType = sessionStorage.getItem('userType'); // e.g., 'passenger' or 'car_owner'
-        console.log('User type:', userType); // Debugging line
+        //console.log('User type:', userType); // Debugging line
 
         let menu = document.getElementById('user-menu');
         menu.innerHTML = '<ul class="menu-list">'; // Clear the menu and start a list
@@ -20,12 +20,14 @@
             menu.innerHTML += `
                 <li><button onclick="publishTrip()">Publish a Trip</button></li>
                 <li><button onclick="manageTrips()">Manage Trips</button></li>
+                <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
             `;
             // Add other car owner specific menu items here
         } else if (userType === 'passenger') {
             menu.innerHTML += `
                 <li><button onclick="browseTrips()">Browse Trips</button></li>
                 <li><button onclick="viewEnrolledTrips()">View Enrolled Trips</button></li>
+                <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
             `;
             // Add other passenger specific menu items here
         }
@@ -349,7 +351,6 @@
             });
     }
 
-
     function enroll(tripId) {
         const user = JSON.parse(sessionStorage.getItem('user'));
         const passengerId = user.userID;
@@ -471,9 +472,182 @@
 
 
 
+    // GENERAL MENU
+    // This function reloads the user menu to reflect updated information
+    function refreshMainMenu() {
+        // Clear the current user menu
+        let menu = document.getElementById('user-menu');
+        if (menu) {
+            menu.innerHTML = '';
+        }
+
+        // Call the loadUserMenu again to repopulate the menu
+        loadUserMenu();
+
+        var user = JSON.parse(sessionStorage.getItem('user'));
+        if (user) {
+            document.getElementById('user-name').textContent = user.first_name + ' ' + user.last_name;
+        }
+    }
+
+    // This is a callback that you might call after the profile update
+    function onProfileUpdateSuccess() {
+
+        // Refresh the main menu
+        refreshMainMenu();
+
+        window.location.reload();
+    }
+
+    // This function verifies the current password by using the login endpoint.
+    function verifyCurrentPassword(email, password, onSuccess, onError) {
+        fetch('http://localhost:5000/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Password verification failed');
+            }
+            return response.json();
+        })
+        .then(data => onSuccess(data))
+        .catch(error => onError(error));
+    }
+
+    function showUpdateProfileForm() {
+        // Retrieve user data from sessionStorage
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        const mainContent = document.getElementById('main-content');
+
+        mainContent.innerHTML = `
+            <h2>Update Profile</h2>
+            <form id="updateProfileForm">
+                <input type="text" id="first_name" placeholder="First Name" value="${user.first_name || ''}" required>
+                <input type="text" id="last_name" placeholder="Last Name" value="${user.last_name || ''}" required>
+                <input type="tel" id="mobile" placeholder="Mobile Number" value="${user.mobile || ''}" required>
+                <input type="email" id="email" placeholder="Email" value="${user.email || ''}" readonly>  
+                <input type="password" id="current_password" placeholder="Current Password" required>
+                <button type="submit">Update Profile</button>
+            </form>
+        `;
+    
+        // Add event listener for form submission
+        document.getElementById('updateProfileForm').addEventListener('submit', handleUpdateProfileFormSubmission);
+    }
+
+    // Function to handle the form submission for updating the user profile
+    function handleUpdateProfileFormSubmission(event) {
+        event.preventDefault();
+
+        // Collect form data
+        const formData = {
+            first_name: document.getElementById('first_name').value,
+            last_name: document.getElementById('last_name').value,
+            mobile: document.getElementById('mobile').value,
+            email: document.getElementById('email').value,
+            current_password: document.getElementById('current_password').value, // Collect the current password
+        };
+
+        // First, verify the current password
+        verifyCurrentPassword(formData.email, formData.current_password, 
+            // onSuccess callback
+            () => {
+                // Update the mobile separately by calling another function
+                updateMobile(formData.email, formData.mobile);
+                // If password verification is successful, proceed with updating the profile
+                updateProfile(formData);
+            },
+            // onError callback
+            (error) => {
+                // If password verification fails, alert the user
+                alert('Current password is incorrect.');
+            }
+        );
+    }
+
+    // Function to update the user's mobile number
+    function updateMobile(email, mobile) {
+        // Parse the mobile number to an integer and stringify it back to ensure it's in integer format
+        const mobileNumber = parseInt(mobile, 10);
+
+        // Check if the mobile number is an integer
+        if (isNaN(mobileNumber)) {
+            alert('Mobile number must be a valid integer. It will not be updated.');
+            return;
+        }
+        
+        fetch('http://localhost:5000/updateMobile', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                mobile: mobileNumber.toString() // Send it as a string but ensure it's an integer
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update mobile number');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Mobile number updated successfully:', data);
+        })
+        .catch(error => {
+            alert('Failed to update mobile number: ' + error.message);
+        });
+    }
+
+    // Function to update the user profile
+    function updateProfile(formData) {
+        fetch('http://localhost:5000/users', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                mobile: formData.mobile,
+                email: formData.email,
+                // Do not send the current password in the update request
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update profile');
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('Profile updated successfully! You will be redirected to login page.');
+            // Update session storage with new user data
+            sessionStorage.setItem('user', JSON.stringify(data));
+            // Optionally, refresh the page or redirect the user
+            sessionStorage.clear(); // Clear session storage
+            window.location.href = 'login.html'; // Redirect to login page
+
+        })
+        .catch(error => {
+            alert('Failed to update profile: ' + error.message);
+        });
+
+        document.getElementById('updateProfileForm').addEventListener('submit', handleUpdateProfileFormSubmission);
+    }
+
+
+
+
     function logout() {
         // Code to handle logout
         sessionStorage.clear(); // Clear session storage
         window.location.href = 'login.html'; // Redirect to login page
     }
+
 

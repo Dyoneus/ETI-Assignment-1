@@ -1,6 +1,14 @@
 Change Log
 
 All notable changes to this project will be documented in this file.
+[2.0.2] - 16/12/2023
+- Add functionality to update user profile including first name, last name, and mobile number.
+- Introduce current password verification step before allowing profile updates to enhance security.
+- Ensure the mobile number is validated as an integer before submission.
+- Modify frontend logic to separate the update of mobile numbers using a dedicated endpoint.
+- Refactor form submission handler to prevent profile updates if mobile number is invalid.
+- Update session storage upon successful profile update to reflect changes immediately.
+
 [2.0.1] - 15/12/2023
 - Includes HTML files for user authentication, main menu navigation, profile management, and trip browsing/enrollment. 
 - JavaScript files are added for handling AJAX calls to the backend services, managing session state, and dynamically updating the UI based on user interactions. 

@@ -48,6 +48,7 @@ form {
 
 input[type="text"],
 input[type="email"],
+input[type="tel"],
 input[type="password"] {
     padding: 10px;
     margin-bottom: 1em;
@@ -112,17 +113,41 @@ button:hover {
 
 /* Handle the case where the input is not required and could be empty */
 #publishTripForm input:not([required]) {
-    background-color: #f8f8f8; /* Lighter background to indicate optional field */
+    background-color: #f8f8f8;
 }
 
 #publishTripForm button {
-  background-color: #f06292; /* Pink color for the button */
+  background-color: #f06292;
   color: white;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-#publishTripForm button:hover {
+
+#updateProfileForm button:hover {
   background-color: #e91e63; /* Darker pink on hover */
+}
+
+#updateProfileForm input[type="text"],
+#updateProfileForm input[type="email"],
+#updateProfileForm input[type="tel"],
+#updateProfileForm input[type="password"],
+#updateProfileForm button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+#updateProfileForm button {
+    background-color: #f06292; /* Pink color for the button */
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+  
+#updateProfileForm button:hover {
+    background-color: #e91e63; /* Darker pink on hover */
 }
