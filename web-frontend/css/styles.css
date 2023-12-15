@@ -9,6 +9,15 @@ body, html {
     justify-content: center;
     background: #f0f4f8;
 }
+.user-menu{
+    max-height: 50vh; /* Adjust the max-height as needed */
+    overflow-y: auto; /* This allows scrolling vertically */
+}
+
+.main-content {
+    max-height: 50vh; /* Adjust the max-height as needed */
+    overflow-y: auto; /* This allows scrolling vertically */
+}
 
 .auth-container {
     display: flex;

@@ -380,6 +380,42 @@
         const user = JSON.parse(sessionStorage.getItem('user'));
         const passengerId = user.userID;
     
+        // First, fetch the currently enrolled trips to check for time conflicts
+        fetch(`http://localhost:5001/enrolled-trips?passenger_id=${passengerId}`)
+        .then(response => response.json())
+        .then(enrolledTrips => {
+            return Promise.all([enrolledTrips, fetch(`http://localhost:5001/trips/${tripId}`)]);
+        })
+        .then(([enrolledTrips, tripResponse]) => {
+            return Promise.all([enrolledTrips, tripResponse.json()]);
+        })
+        .then(([enrolledTrips, selectedTrip]) => {
+            if (hasTimeConflict(enrolledTrips, selectedTrip)) {
+                throw new Error('Time conflict with an already enrolled trip. Time gap of 1 hour in between enrolled trip start time.');
+            } else {
+                return fetch('http://localhost:5001/enroll', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ trip_id: tripId, passenger_id: passengerId }),
+                });
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => Promise.reject(new Error(text)));
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('Successfully enrolled in the trip!');
+            browseTrips();
+        })
+        .catch(error => {
+            alert(`${error.message}`);
+        });
+        /*
         fetch('http://localhost:5001/enroll', {
             method: 'POST',
             headers: {
@@ -418,6 +454,20 @@
                 alert('An unknown error occurred while enrolling in the trip.');
             }
             viewEnrolledTrips();
+        });
+        */
+    }
+
+    // Helper function to check for time conflicts
+    function hasTimeConflict(enrolledTrips, selectedTrip) {
+        const selectedStartTime = new Date(selectedTrip.travel_start_time).getTime();
+        const selectedEndTime = selectedStartTime + (1 * 60 * 60 * 1000); // Assuming a fixed duration of 1 hour
+
+        return enrolledTrips.some(enrolledTrip => {
+            const enrolledStartTime = new Date(enrolledTrip.travel_start_time).getTime();
+            const enrolledEndTime = enrolledStartTime + (1 * 60 * 60 * 1000); // Assuming a fixed duration of 1 hour
+
+            return (selectedStartTime < enrolledEndTime && selectedEndTime > enrolledStartTime);
         });
     }
 
