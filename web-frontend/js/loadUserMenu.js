@@ -111,7 +111,7 @@
         })
         .then(data => {
             // Handle success
-            console.log('Trip published successfully:', data);
+            //console.log('Trip published successfully:', data);
             alert('Trip published successfully!');
             manageTrips();
         })
