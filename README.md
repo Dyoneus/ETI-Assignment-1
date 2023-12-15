@@ -41,11 +41,17 @@ This project implements a car-pooling service platform using microservices archi
 
 ## Setup and Running Instructions
 1. **Backend Services**:
-   - Navigate to each service directory (`user-service`, `trip-service`).
+   - Navigate to each service directory (`user-service` and `trip-service`) in Terminal/CMD.
    - Run `go run main.go` to start each service.
+   - For e.g. (Terminal 1: `\user-service> go run main.go`) & (Terminal 2: `\trip-service> go run main.go`)
 2. **Frontend**:
    - Open the `index.html` from the `web-frontend` directory in a browser.
+   - Ensure backend services (`user-service\main.go` and `trip-service\main.go`) are running for full functionality.
+3. **Console-App**:
+   - Navigate to directory (`console-app`) in Terminal/CMD.
+   - Run `go run main.go` to start the console application UI.
    - Ensure backend services are running for full functionality.
+   - For e.g. (Terminal 1: `\console-app> go run main.go`), (Terminal 2: `\user-service> go run main.go`) & (Terminal 3: `\trip-service> go run main.go`)
 
 ## Database Configuration
 - Create an account named user with the password ‘password’ is created. This account is granted all permission on the database
