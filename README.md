@@ -22,8 +22,7 @@ This project implements a car-pooling service platform using microservices archi
 
 
 ## Architecture Diagram
-![Architecture Diagram](path/to/architecture_diagram.png)
-*Placeholder for the architecture diagram showing the microservices structure and interactions.*
+![Architecture Diagram](web-frontend/images/architectureDiagram.jpg)
 
 
 ## Key Features
@@ -49,6 +48,7 @@ This project implements a car-pooling service platform using microservices archi
    - Ensure backend services are running for full functionality.
 
 ## Database Configuration
+- Create an account named user with the password ‘password’ is created. This account is granted all permission on the database
 - Ensure MySQL is running and configured by creating the 2 database (`carpool` and `carpool_trips`)
 - Backend services will auto create the table in the 2 database created.
 
