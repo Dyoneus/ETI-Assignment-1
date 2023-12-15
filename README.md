@@ -1,44 +1,111 @@
-# ETI-Assignment-1
-Assignment 1 project for ETI module
+# Car-Pooling Service Platform
 
-1. Planning of Microservices
-Given the requirements of the project, I can split the 2 Microservices into:
-- User Service: Manages user accounts, profiles, and authentication.
-- Trip Service: Handles the publishing, updating, searching, and booking of trips.
+## Introduction
+This project implements a car-pooling service platform using microservices architecture. The application facilitates users to either offer car-pooling services (as car owners) or enroll in available trips (as passengers). The backend is developed in Go, interfacing with a MySQL database, and the front-end is a web application using HTML, CSS, and JavaScript. 
 
-2. Defining Data Structure
-For each microservice, define the necessary data structures. For example:
-- User Service: User, Profile, CarOwnerProfile entities.
-- Trip Service: Trip, SeatReservation entities.
+## Design Considerations
 
-3. Implement Microservices in Go
-- Setting up a Go environment and create separate Go modules for each microservice. Each microservice should generally have:
-    - HTTP Server: To handle REST API calls.
+### Microservices
+- **User Service**: Handles user authentication, profile management, and user-type upgrades.
+- **Trip Service**: Manages trip creation, enrollment, and trip history.
+- **Technologies**: Go for backend services, MySQL for persistent storage.
+- **Communication**: RESTful APIs for microservice interaction.
 
-Tools and Libraries to Consider:
-- Gorilla/Mux: For routing HTTP requests.
-- GORM: ORM library for Go to interact with your database.
-- Cobra: To create powerful CLI applications.
-- JWT: For authentication tokens.
+### Frontend
+- **Web Application**: Developed using HTML, CSS, and JavaScript.
+- **Interaction**: Communicates with backend microservices via AJAX calls.
 
-To Do:
-BASIC REQUIREMENTS
-- Your application must implement the following,
-    - Minimum 2 microservices using Go
-    - Persistent storage of information using database. e.g. MySQL	
-- The data structures, domain, and REST APIs chosen should be appropriate for each microservice.
-- Implement a console application that simulates the car-pooling platform frontend. The console application must call your microservices to perform the necessary actions.
+## Architecture Diagram
+![Architecture Diagram](path/to/architecture_diagram.png)
+*Placeholder for the architecture diagram showing the microservices structure and interactions.*
 
-BONUS MARKS
-- Implement a web frontend that calls your microservices, instead of a console application. You can implement the frontend with any language and design of your choice.
+## Key Features
 
-DELIVERABLES
-- Submit the following via GitHub (add your tutor as collaborator),
-- All source codes of your assignment
-- SQL script for setting up your database
-- A readme.md indicating
-    - Design consideration of your microservices
-    - Architecture diagram
-    - Instructions for setting up and running your microservices
-- Submit a 15-minute presentation of the design and implementation of your assignment. Record your presentation and submit via Brightspace.
+- **Password Hashing**: Implements bcrypt hashing for secure password storage, ensuring user credentials are protected.
+- **Automated Trip Management**: The system automatically monitors trip schedules. Trips past their start time are automatically flagged and removed from active listings, ensuring data accuracy and relevancy.
+- **User Type Flexibility**: Users can sign up as passengers and later upgrade to car owners.
+
+
+## Screenshots
+![Login Page](path/to/login_page_screenshot.png)
+*Placeholder for a screenshot of the login page.*
+
+![Main Menu](path/to/main_menu_screenshot.png)
+*Placeholder for a screenshot of the main menu based on user type.*
+
+## Setup and Running Instructions
+1. **Backend Services**:
+   - Navigate to each service directory (`user-service`, `trip-service`).
+   - Run `go run main.go` to start each service.
+2. **Frontend**:
+   - Open the `index.html` from the `web-frontend` directory in a browser.
+   - Ensure backend services are running for full functionality.
+
+## Database Configuration
+- Ensure MySQL is running and configured by creating the 2 database (`carpool` and `carpool_trips`)
+- Backend services will auto create the table in the 2 database created.
+
+---
+
+By [Ong Jia Yuan]
+
+
+# Car-Pooling Service Platform - Task List
+
+1. User Account Creation
+Status: <span style="color: green;">Completed</span>
+Details: Implementation allows both passengers and car owners to create accounts.
+
+2. Default Passenger Profile Creation
+Status: <span style="color: green;">Completed</span>
+Details: Users provide first name, last name, mobile number, and email address.
+
+3. Car Owner Profile Enhancement
+Status: <span style="color: green;">Completed</span>
+Details: Passenger profiles can be upgraded to car owner profiles with additional details like driver’s license and car plate number.
+
+4. Account Information Update
+Status: <span style="color: green;">Completed</span>
+Details: Users can update their account information.
+
+5. Account Deletion Post One Year
+Status: <span style="color: green;">Completed</span>
+Details: Users can delete their accounts after 1 year, adhering to data retention policies.
+
+6. Trip Publishing by Car Owners
+Status: <span style="color: green;">Completed</span>
+Details: Car owners can publish trips with detailed information including pick-up, alternative pick-up locations, start time, destination, and passenger capacity.
+
+7. Trip Enrollment by Passengers
+Status: <span style="color: green;">Completed</span>
+Details: Passengers can browse, search, and enroll in available trips with seat availability and no schedule conflicts.
+
+8. Trip Management by Car Owners
+Status: <span style="color: green;">Completed</span>
+Details: Car owners can only start 30 minutes in the future of scheduled time
+
+10. Retrieve Past Trips
+Status: <span style="color: green;">Completed</span>
+Details: Users can access their past trips in reverse chronological order.
+
+## Additional Features
+
+1. Password Hashing
+Status: <span style="color: green;">Completed</span>
+Details: Passwords are securely hashed during account creation and login.
+
+2. Automatic Trip Deletion
+Status: <span style="color: green;">Completed</span>
+Details: Past trips are automatically deleted from the system after their scheduled start time.
+
+3. Cancel Enrollment (Front-end)
+Status: <span style="color: green;">Completed</span>
+Details: Passengers can cancel their enrollment trip but will not be able to enroll in the same trip.
+
+4. User Authentication (Front-end)
+Status: <span style="color: green;">Completed</span>
+Details: User who tries to enter the main menu page manually in the URL will automatically redirect to login page.
+
+This document will be updated as the project progresses, reflecting new implementations and enhancements.
+
 
