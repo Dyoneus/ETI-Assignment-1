@@ -415,50 +415,9 @@
         .catch(error => {
             alert(`${error.message}`);
         });
-        /*
-        fetch('http://localhost:5001/enroll', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ trip_id: tripId, passenger_id: passengerId }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                // If the HTTP status code is not successful, get the response as text and throw an error
-                return response.text().then(text => Promise.reject(text));
-            }
-            // If the response is ok, parse it as JSON
-            return response.json();
-        })
-        .then(data => {
-            alert('Successfully enrolled in the trip!');
-            // Update the UI accordingly
-            browseTrips();
-        })
-        .catch(error => {
-            // Check if the error is a string (which means it's the text response from the server)
-            if (typeof error === 'string') {
-                if (error.startsWith("User is al")) {
-                    alert('You have already enrolled in this trip!');
-                } else {
-                    alert('Successfully enrolled in the trip!');
-                    viewEnrolledTrips();
-                }
-            } else if (error instanceof Error) {
-                alert('Successfully enrolled in the trip!');
-                viewEnrolledTrips();
-            } else {
-                // Handle other cases or unknown errors
-                console.error('Unknown error enrolling in trip:', error);
-                alert('An unknown error occurred while enrolling in the trip.');
-            }
-            viewEnrolledTrips();
-        });
-        */
     }
 
-    // Helper function to check for time conflicts
+    // Function to check for time conflicts
     function hasTimeConflict(enrolledTrips, selectedTrip) {
         const selectedStartTime = new Date(selectedTrip.travel_start_time).getTime();
         const selectedEndTime = selectedStartTime + (1 * 60 * 60 * 1000); // Assuming a fixed duration of 1 hour
@@ -571,10 +530,10 @@
         fetch(`http://localhost:5001/past-trips/passenger?passengerID=${passengerId}`)
         .then(response => response.json())
         .then(trips => {
-            console.log('Received trips:', trips); // Log the trips to see what you receive
+            //console.log('Received trips:', trips); // Log the trips to see what you receive
             // Sort trips in reverse chronological order
             trips.sort((a, b) => new Date(b.travel_start_time) - new Date(a.travel_start_time));
-            console.log('Sorted trips:', trips); // Log the sorted trips
+            //console.log('Sorted trips:', trips); // Log the sorted trips
             // Ensure the container is present in the DOM
             const mainContent = document.getElementById('main-content');
             if (mainContent) {
