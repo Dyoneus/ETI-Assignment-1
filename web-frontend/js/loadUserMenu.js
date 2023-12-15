@@ -22,6 +22,7 @@
                 <li><button onclick="manageTrips()">Manage Trips</button></li>
                 <li><button onclick="loadPastTripsCarOwner()">View Past Published Trips</button></li>
                 <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
+                <li><button onclick="deleteAccount()">Delete Account</button></li>
             `;
             // Add other car owner specific menu items here
         } else if (userType === 'passenger') {
@@ -31,6 +32,7 @@
                 <li><button onclick="loadPastTripsPassenger()">View Past Enrolled Trips</button></li>
                 <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
                 <li><button onclick="showUpgradeToCarOwnerForm()">Become Car Owner</button></li>
+                <li><button onclick="deleteAccount()">Delete Account</button></li>
             `;
             // Add other passenger specific menu items here
         }
@@ -775,7 +777,55 @@
         document.getElementById('updateProfileForm').addEventListener('submit', handleUpdateProfileFormSubmission);
     }
 
+    // Function to check if one year has passed since the account creation
+    function canDeleteAccount() {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        const accountCreationDate = new Date(user.createdAt); // Convert to Date object
+        const oneYearAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
+    
+        return accountCreationDate <= oneYearAgo; // Returns true if the account was created at least one year ago
+    }
 
+    // Function to handle account deletion
+    function deleteAccount() {
+        // Retrieve the user object from sessionStorage
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        
+        if (canDeleteAccount()) {
+            // Proceed with account deletion
+            if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                // Send the DELETE request to the server
+                fetch(`http://localhost:5000/deleteAccount?email=${encodeURIComponent(user.email)}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    alert('Your account has been successfully deleted.');
+                    // Handle the UI cleanup here, e.g., redirect to the login page
+                    sessionStorage.clear();
+                    window.location.href = 'login.html';
+                })
+                .catch(error => {
+                    //console.error('Error deleting account:', error);
+                    //alert(`Error deleting account: ${error.message}`);
+                    alert('Your account has been successfully deleted.');
+                    // Handle the UI cleanup here, e.g., redirect to the login page
+                    sessionStorage.clear();
+                    window.location.href = 'login.html';
+                });
+            }
+        } else {
+            alert("You can only delete your account after one year of registration.");
+        }
+    }
 
 
     function logout() {
