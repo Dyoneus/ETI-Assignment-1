@@ -1,16 +1,25 @@
-<!--  /web-frontend/index.html -->
-<!--  Main HTML file to define the structure of the web interface. -->
+<!--  /web-frontend/login.html -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Car Pooling Service</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <h1>Welcome to the Car Pooling Service</h1>
-
-    <script src="js/main.js"></script>
+    <div class="auth-container">
+        <div class="card">
+            <h2 class="auth-title">LOGIN</h2>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <label class="remember-me"><input type="checkbox"> Remember me?</label>
+                <button type="submit">LOGIN</button>
+                <p class="switch-auth">Need an account? <a href="signup.html">Sign Up</a></p>
+            </form>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
 </body>
 </html>

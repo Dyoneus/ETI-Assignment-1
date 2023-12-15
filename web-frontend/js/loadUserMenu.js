@@ -11,7 +11,7 @@
         // Check if userType is null and handle the case
         if (!userType) {
             console.log('No user type found in sessionStorage. Redirecting to login.');
-            window.location.href = 'login.html'; // Redirect to login page if userType is not set
+            window.location.href = 'index.html'; // Redirect to login page if userType is not set
             return;
         }
         
@@ -602,7 +602,7 @@
         .catch(error => {
             alert('Successfully upgraded to car owner! Please re-login to take effect.');
             sessionStorage.clear(); // Clear session storage
-            window.location.href = 'login.html'; // Redirect to login page
+            window.location.href = 'index.html'; // Redirect to login page
         });
     }
 
@@ -767,7 +767,7 @@
             sessionStorage.setItem('user', JSON.stringify(data));
             // Optionally, refresh the page or redirect the user
             sessionStorage.clear(); // Clear session storage
-            window.location.href = 'login.html'; // Redirect to login page
+            window.location.href = 'index.html'; // Redirect to login page
 
         })
         .catch(error => {
@@ -811,7 +811,7 @@
                     alert('Your account has been successfully deleted.');
                     // Handle the UI cleanup here, e.g., redirect to the login page
                     sessionStorage.clear();
-                    window.location.href = 'login.html';
+                    window.location.href = 'index.html';
                 })
                 .catch(error => {
                     //console.error('Error deleting account:', error);
@@ -819,7 +819,7 @@
                     alert('Your account has been successfully deleted.');
                     // Handle the UI cleanup here, e.g., redirect to the login page
                     sessionStorage.clear();
-                    window.location.href = 'login.html';
+                    window.location.href = 'index.html';
                 });
             }
         } else {
@@ -831,7 +831,7 @@
     function logout() {
         // Code to handle logout
         sessionStorage.clear(); // Clear session storage
-        window.location.href = 'login.html'; // Redirect to login page
+        window.location.href = 'index.html'; // Redirect to login page
     }
 
 

@@ -1,4 +1,10 @@
 //  /web-frontend/js/signup.js
+// Function to validate mobile number (only integers allowed)
+function isValidMobile(mobile) {
+    // Regular expression pattern for integers only
+    var pattern = /^\d+$/;
+    return pattern.test(mobile);
+}
 
 document.getElementById('signupForm').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -10,6 +16,12 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
     var password = document.getElementById('password').value;
     var confirmPassword = document.getElementById('confirmPassword').value;
 
+    // Check if mobile number is valid
+    if (!isValidMobile(mobile)) {
+        alert("Mobile number must contain digits only.");
+        return; // Stop execution if mobile number is not valid
+    }
+
     // Check if both passwords match
     if (password === confirmPassword) {
         console.log('Passwords match. Proceed with sign up.');
@@ -19,7 +31,7 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
         xhr.onload = function() {
             if (xhr.status === 201) {
                 alert('Sign Up successful!');
-                window.location.href = 'login.html'; // Redirect to login page after successful signup
+                window.location.href = 'index.html'; // Redirect to login page after successful signup
             } else {
                 alert('Sign Up failed: ' + xhr.responseText);
             }
