@@ -1,4 +1,6 @@
 # Car-Pooling Service Platform
+![Home Page](web-frontend/images/home.jpg)
+![Platform on Console](web-frontend/images/consolehome.png)
 
 ## Introduction
 This project implements a car-pooling service platform using microservices architecture. The application facilitates users to either offer car-pooling services (as car owners) or enroll in available trips (as passengers). The backend is developed in Go, interfacing with a MySQL database, and the front-end is a web application using HTML, CSS, and JavaScript. 
