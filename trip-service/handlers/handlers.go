@@ -119,7 +119,7 @@ func DeleteTrip(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func ListSoftDeletedTrips(db *gorm.DB) http.HandlerFunc {
+func ListSoftDeletedTripsForCarOwner(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var trips []models.Trip
 		if result := db.Unscoped().Where("deleted_at IS NOT NULL").Find(&trips); result.Error != nil {
@@ -129,6 +129,48 @@ func ListSoftDeletedTrips(db *gorm.DB) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(trips)
+	}
+}
+
+func ListSoftDeletedTrips(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userType := r.URL.Query().Get("userType")
+		userID := r.URL.Query().Get("userID")
+
+		var trips []models.Trip
+		var result *gorm.DB
+
+		if userType == "car_owner" {
+			result = db.Unscoped().Where("car_owner_id = ? AND deleted_at IS NOT NULL", userID).Find(&trips)
+		} else if userType == "passenger" {
+			// Assuming there's a join table for reservations
+			result = db.Unscoped().Table("trips").
+				Joins("JOIN reservations ON reservations.trip_id = trips.id").
+				Where("reservations.passenger_id = ? AND trips.deleted_at IS NOT NULL", userID).
+				Find(&trips)
+		} else {
+			http.Error(w, "Invalid user type", http.StatusBadRequest)
+			return
+		}
+
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(trips)
+
+		/*
+			var trips []models.Trip
+			if result := db.Unscoped().Where("deleted_at IS NOT NULL").Find(&trips); result.Error != nil {
+				http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(trips)
+		*/
 	}
 }
 
@@ -435,5 +477,26 @@ func CancelEnrollment(db *gorm.DB) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Canceled enrollment successfully")
+	}
+}
+
+// FOR WEB
+func GetPastTripsByCarOwner(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ownerID := r.URL.Query().Get("ownerID")
+		if ownerID == "" {
+			http.Error(w, "Owner ID is required", http.StatusBadRequest)
+			return
+		}
+
+		var trips []models.Trip
+		result := db.Unscoped().Where("car_owner_id = ? AND deleted_at IS NOT NULL", ownerID).Find(&trips)
+		if result.Error != nil {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(trips)
 	}
 }

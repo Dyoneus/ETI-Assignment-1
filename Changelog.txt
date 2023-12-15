@@ -8,6 +8,12 @@ All notable changes to this project will be documented in this file.
 - Modify frontend logic to separate the update of mobile numbers using a dedicated endpoint.
 - Refactor form submission handler to prevent profile updates if mobile number is invalid.
 - Update session storage upon successful profile update to reflect changes immediately.
+- Add front-end functionality to fetch and display past trips for both car owners and passengers.
+- Sort retrieved trips in reverse chronological order before display.
+- Ensure error handling for fetch requests to handle server or network issues.
+- Update Go server handlers to provide routes for retrieving past trips based on user roles.
+- Fix URL construction in JavaScript fetch calls to match the server's expected endpoints.
+- Test and verify that past trips are correctly displayed in the user interface.
 
 [2.0.1] - 15/12/2023
 - Includes HTML files for user authentication, main menu navigation, profile management, and trip browsing/enrollment. 
@@ -165,22 +171,3 @@ Added
 Changed
 
 Fixed
-
-
-
-
-
-
-Sample:
-Here we would have the update steps for 1.2.4 for people to follow.
-Added
-
-Changed
-    PROJECTNAME-ZZZZ PATCH Drupal.org is now used for composer.
-
-Fixed
-    PROJECTNAME-TTTT PATCH Add logic to runsheet teaser delete to delete corresponding schedule cards.
-
-MINOR
-PATCH
-MAJOR

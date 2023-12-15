@@ -64,7 +64,8 @@ func main() {
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.EditTrip(db)).Methods("PATCH") // Added trip ID parameter
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.GetTrip(db)).Methods("GET")
 	r.HandleFunc("/trips/{id:[0-9]+}", handlers.DeleteTrip(db)).Methods("DELETE")
-	r.HandleFunc("/past-trips", handlers.ListSoftDeletedTrips(db)).Methods("GET")
+	r.HandleFunc("/past-trips", handlers.ListSoftDeletedTripsForCarOwner(db)).Methods("GET")
+	r.HandleFunc("/past-trips/car-owner", handlers.GetPastTripsByCarOwner(db)).Methods("GET") // Used by front-end
 	r.HandleFunc("/available-trips", handlers.AvailableTrips(db)).Methods("GET")
 	r.HandleFunc("/enroll", handlers.EnrollInTrip(db)).Methods("POST")
 	r.HandleFunc("/enrolled-trips", handlers.GetEnrolledTripsHandler(db)).Methods("GET")

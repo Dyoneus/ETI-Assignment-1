@@ -151,3 +151,7 @@ button:hover {
 #updateProfileForm button:hover {
     background-color: #e91e63; /* Darker pink on hover */
 }
+
+.trip {
+    margin-bottom: 40px; /* Adjust the space as needed */
+}

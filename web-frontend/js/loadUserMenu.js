@@ -20,13 +20,15 @@
             menu.innerHTML += `
                 <li><button onclick="publishTrip()">Publish a Trip</button></li>
                 <li><button onclick="manageTrips()">Manage Trips</button></li>
+                <li><button onclick="loadPastTripsCarOwner()">View Past Published Trips</button></li>
                 <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
             `;
             // Add other car owner specific menu items here
         } else if (userType === 'passenger') {
             menu.innerHTML += `
                 <li><button onclick="browseTrips()">Browse Trips</button></li>
-                <li><button onclick="viewEnrolledTrips()">View Enrolled Trips</button></li>
+                <li><button onclick="viewEnrolledTrips()">View Current Enrolled Trips</button></li>
+                <li><button onclick="loadPastTripsPassenger()">View Past Enrolled Trips</button></li>
                 <li><button onclick="showUpdateProfileForm()">Update Profile</button></li>
             `;
             // Add other passenger specific menu items here
@@ -318,6 +320,29 @@
         });
     }
 
+    // Function to load past trips for car owners
+    function loadPastTripsCarOwner() {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        const carOwnerId = user.userID; // or the correct property that holds the ID
+    
+        fetch(`http://localhost:5001/past-trips/car-owner?ownerID=${carOwnerId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(trips => {
+            // Sort trips in reverse chronological order
+            trips.sort((a, b) => new Date(b.travel_start_time) - new Date(a.travel_start_time));
+            displayTrips(trips);
+        })
+        .catch(error => {
+            console.error('Error loading past trips:', error);
+        });
+    }
+  
+
 
 
     // PASSENGER MENU
@@ -469,6 +494,48 @@
             viewEnrolledTrips(); // This would re-fetch the enrolled trips
         });
     }
+    
+    // Utility function to display trips on the page
+    function displayTrips(trips) {
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = '<h2>Past Trips:</h2>'; // Clear previous content and add title
+
+        trips.forEach(trip => {
+            const tripElement = document.createElement('div');
+            tripElement.className = 'trip';
+            tripElement.innerHTML = `
+                <p>Driver: ${trip.car_owner_name}</p>
+                <p>From: ${trip.pick_up_location}</p>
+                <p>To: ${trip.destination_address}</p>
+                <p>On: ${new Date(trip.travel_start_time).toLocaleString()}</p>
+            `;
+            mainContent.appendChild(tripElement);
+        });
+    }
+
+    // Function to load past trips for passengers
+    function loadPastTripsPassenger() {
+        const userID = JSON.parse(sessionStorage.getItem('user')).userID;
+        const passengerId = userID;
+    
+        fetch(`http://localhost:5001/past-trips/passenger?passengerID=${passengerId}`)
+        .then(response => response.json())
+        .then(trips => {
+            console.log('Received trips:', trips); // Log the trips to see what you receive
+            // Sort trips in reverse chronological order
+            trips.sort((a, b) => new Date(b.travel_start_time) - new Date(a.travel_start_time));
+            console.log('Sorted trips:', trips); // Log the sorted trips
+            // Ensure the container is present in the DOM
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                displayTrips(trips, 'main-content'); // Assuming 'main-content' is the container for displaying trips
+            } else {
+                console.error('Container for displaying trips not found.');
+            }
+        })
+        .catch(error => console.error('Error loading past trips:', error));
+    }
+
 
 
 
