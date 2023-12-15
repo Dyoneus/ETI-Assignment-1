@@ -32,13 +32,6 @@ This project implements a car-pooling service platform using microservices archi
 - **User Type Flexibility**: Users can sign up as passengers and later upgrade to car owners.
 
 
-## Screenshots
-![Login Page](path/to/login_page_screenshot.png)
-*Placeholder for a screenshot of the login page.*
-
-![Main Menu](path/to/main_menu_screenshot.png)
-*Placeholder for a screenshot of the main menu based on user type.*
-
 ## Setup and Running Instructions
 1. **Backend Services**:
    - Navigate to each service directory (`user-service` and `trip-service`) in Terminal/CMD.
