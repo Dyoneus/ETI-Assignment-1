@@ -15,9 +15,11 @@ This project implements a car-pooling service platform using microservices archi
 - **Web Application**: Developed using HTML, CSS, and JavaScript.
 - **Interaction**: Communicates with backend microservices via AJAX calls.
 
+
 ## Architecture Diagram
 ![Architecture Diagram](path/to/architecture_diagram.png)
 *Placeholder for the architecture diagram showing the microservices structure and interactions.*
+
 
 ## Key Features
 
@@ -53,39 +55,39 @@ By [Ong Jia Yuan]
 # Car-Pooling Service Platform - Task List
 
 1. User Account Creation
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Implementation allows both passengers and car owners to create accounts.
 
 2. Default Passenger Profile Creation
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Users provide first name, last name, mobile number, and email address.
 
 3. Car Owner Profile Enhancement
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Passenger profiles can be upgraded to car owner profiles with additional details like driver’s license and car plate number.
 
 4. Account Information Update
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Users can update their account information.
 
 5. Account Deletion Post One Year
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Users can delete their accounts after 1 year, adhering to data retention policies.
 
 6. Trip Publishing by Car Owners
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Car owners can publish trips with detailed information including pick-up, alternative pick-up locations, start time, destination, and passenger capacity.
 
 7. Trip Enrollment by Passengers
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Passengers can browse, search, and enroll in available trips with seat availability and no schedule conflicts.
 
 8. Trip Management by Car Owners
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Car owners can only start 30 minutes in the future of scheduled time
 
 10. Retrieve Past Trips
-Status: <span style="color: green;">Completed</span>
++Status: Completed
 Details: Users can access their past trips in reverse chronological order.
 
 ## Additional Features
