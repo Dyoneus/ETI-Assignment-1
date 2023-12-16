@@ -20,32 +20,28 @@ This project implements a car-pooling service platform using microservices archi
 - **Web Application**: Developed using HTML, CSS, and JavaScript.
 - **Interaction**: Communicates with backend microservices via AJAX calls.
 
-
-## Architecture Diagram
-![Architecture Diagram](web-frontend/images/architectureDiagram.jpg)
-
-
 ## Key Features
 
 - **Password Hashing**: Implements bcrypt hashing for secure password storage, ensuring user credentials are protected.
 - **Automated Trip Management**: The system automatically monitors trip schedules. Trips past their start time are automatically flagged and removed from active listings, ensuring data accuracy and relevancy.
 - **User Type Flexibility**: Users can sign up as passengers and later upgrade to car owners.
 
-
-## Screenshots
-![Login Page](path/to/login_page_screenshot.png)
-*Placeholder for a screenshot of the login page.*
-
-![Main Menu](path/to/main_menu_screenshot.png)
-*Placeholder for a screenshot of the main menu based on user type.*
+## Architecture Diagram
+![Architecture Diagram](web-frontend/images/architectureDiagram.jpg)
 
 ## Setup and Running Instructions
 1. **Backend Services**:
-   - Navigate to each service directory (`user-service`, `trip-service`).
+   - Navigate to each service directory (`user-service` and `trip-service`) in Terminal/CMD.
    - Run `go run main.go` to start each service.
+   - For e.g. (Terminal 1: `\user-service> go run main.go`) & (Terminal 2: `\trip-service> go run main.go`)
 2. **Frontend**:
    - Open the `index.html` from the `web-frontend` directory in a browser.
+   - Ensure backend services (`user-service\main.go` and `trip-service\main.go`) are running for full functionality.
+3. **Console-App**:
+   - Navigate to directory (`console-app`) in Terminal/CMD.
+   - Run `go run main.go` to start the console application UI.
    - Ensure backend services are running for full functionality.
+   - For e.g. (Terminal 1: `\console-app> go run main.go`), (Terminal 2: `\user-service> go run main.go`) & (Terminal 3: `\trip-service> go run main.go`)
 
 ## Database Configuration
 - Create an account named user with the password ‘password’ is created. This account is granted all permission on the database
