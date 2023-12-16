@@ -29,7 +29,16 @@ This project implements a car-pooling service platform using microservices archi
 ## Architecture Diagram
 ![Architecture Diagram](web-frontend/images/architectureDiagram.jpg)
 
+
+## Database Configuration
+- Create an account named user with the password ‘password’ is created. This account is granted all permission on the database
+- Ensure MySQL is running and configured by creating the 2 database (`carpool` and `carpool_trips`)
+- Backend services will auto create the table in the 2 database created.
+- SQL statement script is in the same directory as README.md
+
 ## Setup and Running Instructions
+Note: Make sure to setup Database Configuration before continuing the setup here.
+
 1. **Backend Services**:
    - Navigate to each service directory (`user-service` and `trip-service`) in Terminal/CMD.
    - Run `go run main.go` to start each service.
@@ -43,10 +52,7 @@ This project implements a car-pooling service platform using microservices archi
    - Ensure backend services are running for full functionality.
    - For e.g. (Terminal 1: `\console-app> go run main.go`), (Terminal 2: `\user-service> go run main.go`) & (Terminal 3: `\trip-service> go run main.go`)
 
-## Database Configuration
-- Create an account named user with the password ‘password’ is created. This account is granted all permission on the database
-- Ensure MySQL is running and configured by creating the 2 database (`carpool` and `carpool_trips`)
-- Backend services will auto create the table in the 2 database created.
+
 
 ---
 
